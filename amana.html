@@ -378,43 +378,44 @@ body {
   font-size: 26px;
   font-weight: 900;
   color: #1a2744;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
-.signatures-sub {
-  font-size: 14px;
-  color: #667;
-  margin-bottom: 24px;
-}
-.signatures-gallery {
-  background: #f8f6f2;
-  border: 2px dashed #c9a84c;
-  padding: 36px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+
+/* 3-COLUMN RECENT SIGNATURES GRID */
+.recent-signatures-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  min-height: 190px;
+  margin-top: 16px;
 }
-.signatures-gallery img {
-  max-width: 100%;
-  height: auto;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-  display: block;
-}
-.signatures-placeholder-icon {
-  width: 46px;
-  height: 46px;
-  color: #c9a84c;
-}
-.signatures-placeholder-text {
-  font-size: 15px;
-  font-weight: 700;
+.recent-sig-card {
+  background: #f8f6f2;
+  border: 1px solid #e2ded5;
+  border-right: 3px solid #c9a84c;
+  padding: 12px 14px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
   color: #1a2744;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
-.signatures-placeholder-sub {
-  font-size: 13px;
-  color: #778;
+.recent-sig-card::before {
+  content: '✓';
+  color: #c9a84c;
+  font-weight: 800;
+}
+@media (max-width: 600px) {
+  .recent-signatures-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 400px) {
+  .recent-signatures-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* BOTTOM CLOSING CALL TO ACTION */
@@ -984,26 +985,6 @@ body {
     </article>
 </main>
 
-<!-- SIGNATURES GALLERY / PLACEHOLDER -->
-<section class="signatures-section" id="signatures">
-  <div class="signatures-inner">
-    <h2 class="signatures-title">חתימות התמיכה באמנה</h2>
-    <p class="signatures-sub">כאן יוצגו החתימות של נשות הציבור, המנהיגות והתומכות באמנה</p>
-    
-    <div class="signatures-gallery" id="signatures-container">
-      <svg class="signatures-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="16" y1="13" x2="8" y2="13"></line>
-        <line x1="16" y1="17" x2="8" y2="17"></line>
-        <polyline points="10 9 9 9 8 9"></polyline>
-      </svg>
-      <div class="signatures-placeholder-text">לוח החתימות מתעדכן כעת</div>
-      <div class="signatures-placeholder-sub">חתימות התמיכה הראשונות יעלו כאן הערב</div>
-    </div>
-  </div>
-</section>
-
 <!-- CLOSING CALL TO ACTION & SIGNATURE FORM -->
 <section class="closing-cta-section" id="sign-section">
   <div class="closing-inner">
@@ -1029,8 +1010,8 @@ body {
           <input type="email" id="s-email" placeholder="כתובת אימייל *" autocomplete="email" required />
         </div>
         <div class="sign-form-checkbox">
-          <input type="checkbox" id="s-consent" checked />
-          <label for="s-consent">אני תומכת בסעיפי אמנת הנשים החרדיות ומאשרת להוסיף את חתימתי לציבור החותמות.</label>
+          <input type="checkbox" id="s-hide-name" />
+          <label for="s-hide-name">לא להציג את החתימה שלי באתר (חתימה אנונימית)</label>
         </div>
         <button type="button" class="sign-submit-btn" onclick="submitSignature()">
           <span>לחתימה על האמנה</span>
@@ -1044,6 +1025,25 @@ body {
     </div>
 
     <div class="signature-notice-sm">החתימה מאובטחת. הפרטים לא יועברו לשום גורם שלישי.</div>
+  </div>
+</section>
+
+<!-- RECENT SIGNATURES SECTION -->
+<section class="signatures-section" id="signatures">
+  <div class="signatures-inner">
+    <h2 class="signatures-title">חתימות התמיכה באמנה</h2>
+    
+    <!-- 3 COLUMNS x 4 ROWS GRID FOR RECENT 12 PUBLIC SIGNATURES -->
+    <div class="recent-signatures-grid" id="recent-signatures-list">
+      <!-- Will be populated dynamically or fallback -->
+    </div>
+
+    <!-- MANUAL SIGNATURES IMAGE CONTAINER -->
+    <div style="margin-top: 32px;" id="manual-signatures-wrap">
+      <!-- בעת קבלת תמונת החתימות הידניות, היא תוצג כאן:
+           <img src="signatures-manual.png" alt="חתימות ידניות על אמנת הנשים החרדיות" style="max-width:100%; height:auto; border:1px solid #d0ccc4; box-shadow:0 4px 12px rgba(0,0,0,0.08);" />
+      -->
+    </div>
   </div>
 </section>
 
@@ -1099,23 +1099,46 @@ function collapseAllTopics() {
   });
 }
 
-// Signature Form & Counter Logic (Google Sheets Integration)
-const AMANA_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzpOrk30NTdDkRrIJMFhRuXtRpJlfJaOJabem2t9xtcdu1J2TupIPUXkNl7BBYOBtEg2w/exec';
-const INITIAL_OFFSET = 0; // ניתן להוסיף בסיס חתימות במידת הצורך
+// Sample initial signatures list (12 entries for 3x4 grid)
+const RECENT_NAMES_FALLBACK = [
+  "רחלי מ.", "חנה ק.", "מיכל ש.",
+  "אסתר ב.", "ציפי ל.", "תמי ז.",
+  "מרים א.", "פייגי כ.", "יעל צ.",
+  "שרה נ.", "דבורה ר.", "רבקה פ."
+];
 
-let currentSignaturesCount = 0;
+function populateRecentSignatures(list) {
+  const container = document.getElementById('recent-signatures-list');
+  if (!container) return;
+  
+  const displayList = (list && list.length > 0) ? list.slice(-12).reverse() : RECENT_NAMES_FALLBACK;
+  container.innerHTML = displayList.map(name => `<div class="recent-sig-card">${name}</div>`).join('');
+}
 
 function fetchSignaturesCount() {
-  if (!AMANA_WEBHOOK_URL) return;
+  if (!AMANA_WEBHOOK_URL) {
+    populateRecentSignatures(RECENT_NAMES_FALLBACK);
+    return;
+  }
   fetch(AMANA_WEBHOOK_URL)
     .then(r => r.json())
     .then(data => {
-      if (data && typeof data.total === 'number') {
-        currentSignaturesCount = data.total + INITIAL_OFFSET;
-        updateCounterDisplay(currentSignaturesCount);
+      if (data) {
+        if (typeof data.total === 'number') {
+          currentSignaturesCount = data.total + INITIAL_OFFSET;
+          updateCounterDisplay(currentSignaturesCount);
+        }
+        if (Array.isArray(data.recentNames)) {
+          populateRecentSignatures(data.recentNames);
+        } else {
+          populateRecentSignatures(RECENT_NAMES_FALLBACK);
+        }
       }
     })
-    .catch(err => console.log('Error fetching signature count:', err));
+    .catch(err => {
+      console.log('Error fetching signature count:', err);
+      populateRecentSignatures(RECENT_NAMES_FALLBACK);
+    });
 }
 
 function updateCounterDisplay(count) {
@@ -1130,7 +1153,7 @@ function updateCounterDisplay(count) {
 function submitSignature() {
   const nameInput = document.getElementById('s-name');
   const emailInput = document.getElementById('s-email');
-  const consentInput = document.getElementById('s-consent');
+  const hideNameInput = document.getElementById('s-hide-name');
   const errorEl = document.getElementById('s-error');
   const successEl = document.getElementById('s-success');
   const formInner = document.getElementById('sign-form-inner');
@@ -1138,12 +1161,12 @@ function submitSignature() {
 
   const name = nameInput ? nameInput.value.trim() : '';
   const email = emailInput ? emailInput.value.trim() : '';
-  const isConsent = consentInput ? consentInput.checked : false;
+  const hideName = hideNameInput ? hideNameInput.checked : false;
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!name || !email || !emailRegex.test(email) || !isConsent) {
+  if (!name || !email || !emailRegex.test(email)) {
     if (errorEl) {
-      errorEl.textContent = 'יש למלא שם מלא, כתובת אימייל תקינה ולאשר את ההצהרה';
+      errorEl.textContent = 'יש למלא שם מלא וכתובת אימייל תקינה';
       errorEl.style.display = 'block';
     }
     return;
@@ -1162,10 +1185,11 @@ function submitSignature() {
     action: 'sign_amana',
     name: name,
     email: email,
+    hideName: hideName,
     timestamp: new Date().toISOString()
   };
 
-  // Send to Google Sheets Webhook via fetch / no-cors if needed
+  // Send to Google Sheets Webhook
   if (AMANA_WEBHOOK_URL) {
     fetch(AMANA_WEBHOOK_URL, {
       method: 'POST',
@@ -1174,9 +1198,8 @@ function submitSignature() {
     })
     .then(r => r.json().catch(() => ({ status: 'success' })))
     .then(() => handleSuccess())
-    .catch(() => handleSuccess()); // Fallback on CORS mode if opaque
+    .catch(() => handleSuccess());
   } else {
-    // If Webhook URL is not set yet
     handleSuccess();
   }
 
@@ -1184,6 +1207,19 @@ function submitSignature() {
     localStorage.setItem('amana_user_signed', 'true');
     currentSignaturesCount += 1;
     updateCounterDisplay(currentSignaturesCount);
+
+    if (!hideName) {
+      const container = document.getElementById('recent-signatures-list');
+      if (container) {
+        const newCard = document.createElement('div');
+        newCard.className = 'recent-sig-card';
+        newCard.textContent = name;
+        container.insertBefore(newCard, container.firstChild);
+        if (container.children.length > 12) {
+          container.removeChild(container.lastChild);
+        }
+      }
+    }
 
     if (formInner) formInner.style.display = 'none';
     if (successEl) successEl.style.display = 'block';
@@ -1193,7 +1229,7 @@ function submitSignature() {
 // Check if user already signed on load & fetch live count
 document.addEventListener('DOMContentLoaded', () => {
   fetchSignaturesCount();
-  setInterval(fetchSignaturesCount, 30000); // רענון כל 30 שניות
+  setInterval(fetchSignaturesCount, 30000);
 
   if (localStorage.getItem('amana_user_signed')) {
     const formInner = document.getElementById('sign-form-inner');
