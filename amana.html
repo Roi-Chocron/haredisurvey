@@ -605,6 +605,46 @@ body {
   text-decoration: underline;
 }
 
+/* FLOATING SIGNATURE BUTTON */
+.floating-sign-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 999;
+  background: #8b0000;
+  color: #ffffff !important;
+  font-family: 'Heebo', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 12px 24px;
+  border-radius: 50px;
+  text-decoration: none;
+  box-shadow: 0 4px 18px rgba(139, 0, 0, 0.6);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+.floating-sign-btn:hover {
+  background: #a30000;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 6px 24px rgba(139, 0, 0, 0.75);
+}
+@media (max-width: 640px) {
+  .floating-sign-btn {
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 320px;
+    justify-content: center;
+  }
+  .floating-sign-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+  }
+}
+
 /* RESPONSIVE */
 @media (max-width: 640px) {
   .hero-eyebrow { font-size: 32px; }
@@ -677,13 +717,21 @@ body {
     <p class="hero-lead">
       עשרות נשים חרדיות ישבו לנסח אמנה שתרכז את כל צרכי הנשים החרדיות, ותהפוך לתכנית עבודה לנבחרי הציבור בכנסת הבאה. עכשיו תורך לחתום!!! בואי נגרום לפוליטיקאים הישראלים להכניס את הצרכים שלנו לסדר העדיפויות!
     </p>
-    <div class="hero-cta-wrap" style="margin-top:24px;">
+    <!-- TOP COUNTER HEADING -->
+    <div style="margin-top: 24px; margin-bottom: 8px;">
+      <h2 style="font-family:'Frank Ruhl Libre', serif; font-size: 28px; font-weight: 900; color: #c9a84c; line-height: 1.3;">
+        <span id="hero-signatures-count-num">-</span> נשים חרדיות כבר חתמו על האמנה!
+      </h2>
+      <p style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 4px;">עכשיו תורך!</p>
+    </div>
+
+    <div class="hero-cta-wrap" style="margin-top: 18px;">
       <a href="#sign-section" class="btn-primary">
         <span>לחתימה על האמנה</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 5 5 12 12 19"></polyline></svg>
       </a>
-      <a href="https://whatsapp.com/channel/0029Vb7tfHPLikgE1an2xh0j" target="_blank" rel="noopener" class="btn-gold" style="background:#25D366;color:#fff !important;box-shadow:0 4px 14px rgba(37,211,102,0.35);">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.564 4.14 1.543 5.873L.057 23.428a.5.5 0 0 0 .609.609l5.579-1.484A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.686-.512-5.215-1.402l-.374-.22-3.862 1.028 1.028-3.842-.23-.386A9.944 9.944 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      <a href="https://whatsapp.com/channel/0029Vb7tfHPLikgE1an2xh0j" target="_blank" rel="noopener" class="btn-gold">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.564 4.14 1.543 5.873L.057 23.428a.5.5 0 0 0 .609.609l5.579-1.484A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.686-.512-5.215-1.402l-.374-.22-3.862 1.028 1.028-3.842-.23-.386A9.944 9.944 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
         <span>להצטרפות לערוץ ה-WhatsApp</span>
       </a>
     </div>
@@ -991,13 +1039,19 @@ body {
         <div class="sign-form-error" id="s-error">יש למלא שם מלא וכתובת אימייל תקינה</div>
       </div>
       <div class="sign-form-success" id="s-success">
-        ✓ חתימתך התקבלה בהצלחה ותתווסף למונעי האמנה! תודה על תמיכתך.
+        ✓ חתימתך התקבלה בהצלחה ותתווסף לכלל חותמי האמנה! תודה על תמיכתך.
       </div>
     </div>
 
     <div class="signature-notice-sm">החתימה מאובטחת. הפרטים לא יועברו לשום גורם שלישי.</div>
   </div>
 </section>
+
+<!-- FLOATING SIGNATURE BUTTON -->
+<a href="#sign-section" class="floating-sign-btn">
+  <span>לחתימה על האמנה</span>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 5 5 12 12 19"></polyline></svg>
+</a>
 
 <!-- FOOTER -->
 <footer class="site-footer">
@@ -1065,10 +1119,12 @@ function fetchSignaturesCount() {
 }
 
 function updateCounterDisplay(count) {
+  if (count === undefined) return;
+  const formatted = Number(count).toLocaleString('he-IL');
   const numEl = document.getElementById('signatures-count-num');
-  if (numEl && count !== undefined) {
-    numEl.textContent = Number(count).toLocaleString('he-IL');
-  }
+  const heroNumEl = document.getElementById('hero-signatures-count-num');
+  if (numEl) numEl.textContent = formatted;
+  if (heroNumEl) heroNumEl.textContent = formatted;
 }
 
 function submitSignature() {
