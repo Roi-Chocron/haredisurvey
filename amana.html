@@ -1115,12 +1115,12 @@ function populateRecentSignatures(list) {
   container.innerHTML = displayList.map(name => `<div class="recent-sig-card">${name}</div>`).join('');
 }
 
+const AMANA_API_URL = '/api/amana';
+const INITIAL_OFFSET = 0;
+let currentSignaturesCount = 0;
+
 function fetchSignaturesCount() {
-  if (!AMANA_WEBHOOK_URL) {
-    populateRecentSignatures(RECENT_NAMES_FALLBACK);
-    return;
-  }
-  fetch(AMANA_WEBHOOK_URL)
+  fetch(AMANA_API_URL)
     .then(r => r.json())
     .then(data => {
       if (data) {
@@ -1189,19 +1189,15 @@ function submitSignature() {
     timestamp: new Date().toISOString()
   };
 
-  // Send to Google Sheets Webhook
-  if (AMANA_WEBHOOK_URL) {
-    fetch(AMANA_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: JSON.stringify(payload)
-    })
-    .then(r => r.json().catch(() => ({ status: 'success' })))
-    .then(() => handleSuccess())
-    .catch(() => handleSuccess());
-  } else {
-    handleSuccess();
-  }
+  // Send to Netlify Serverless Function (saves to Postgres DB and Google Sheets)
+  fetch(AMANA_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json().catch(() => ({ status: 'success' })))
+  .then(() => handleSuccess())
+  .catch(() => handleSuccess());
 
   function handleSuccess() {
     localStorage.setItem('amana_user_signed', 'true');

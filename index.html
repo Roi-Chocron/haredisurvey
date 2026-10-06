@@ -573,7 +573,7 @@ body { font-family: 'Heebo', sans-serif; direction: rtl; background: #f0ede6; co
 </div>
 
 <script>
-const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbze-gp1fhKJX-UfDAbacHEBaam4gzuQ4Gs-YP2Aru5h0bGxHI5wNb3Z8d6RHcHP3PJ5/exec';
+const WEBHOOK_URL = '/api/survey';
 const OPEN_TIME  = new Date('2026-07-29T05:00:00Z'); // 29/7 08:00 שעון ישראל
 const CLOSE_TIME = new Date('2026-08-05T17:00:00Z'); // 5/8 20:00 שעון ישראל (UTC+3)
 const VOTING_CLOSED = true; // ההצבעה נסגרה
@@ -1012,7 +1012,7 @@ function submitNotify() {
   const err = document.getElementById('n-error');
   if (!name || !phone || !emailOk || !consent) { err.style.display='block'; return; }
   err.style.display = 'none';
-  fetch(WEBHOOK_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+  fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ type:'notify', name, phone, email, timestamp: new Date().toLocaleString('he-IL') }) }).catch(()=>{});
   document.querySelector('.notify-fields').style.display = 'none';
   document.querySelector('.notify-checkbox').style.display = 'none';
@@ -1037,7 +1037,7 @@ async function submitVote() {
   const payload = { type:'vote', timestamp: new Date().toLocaleString('he-IL'), name, phone, email, votes };
   document.getElementById('loading-overlay').classList.add('active');
   try {
-    await fetch(WEBHOOK_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    await fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
   } catch(e) {}
 
   // שמירת הטלפון כ"הצביע"
