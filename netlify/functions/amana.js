@@ -67,22 +67,23 @@ export default async (req) => {
         console.error("Error saving to database:", dbErr);
       }
 
-      // 2. Forward to Google Sheets from the server
-      try {
-        await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: JSON.stringify({
-            action: "sign_amana",
-            name,
-            email,
-            hideName: Boolean(hideName),
-            timestamp: new Date().toISOString()
-          })
-        });
-      } catch (sheetErr) {
-        console.error("Error forwarding to Google Sheets:", sheetErr);
-      }
+      // 2. Forward to Google Sheets asynchronously (non-blocking, so user gets immediate response)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: JSON.stringify({
+          action: "sign_amana",
+          name,
+          email,
+          hideName: Boolean(hideName),
+          timestamp: new Date().toISOString()
+        }),
+        signal: controller.signal
+      })
+      .catch((sheetErr) => console.error("Error forwarding to Google Sheets:", sheetErr))
+      .finally(() => clearTimeout(timeoutId));
 
       return new Response(JSON.stringify({ status: "success" }), {
         status: 200,
