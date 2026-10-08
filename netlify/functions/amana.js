@@ -92,26 +92,13 @@ export default async (req) => {
         ORDER BY id DESC
       `;
 
-      let dbTotal = countRes[0]?.total || 0;
-      let dbNames = allRes.map((r) => normalizeName(r.name)).filter(Boolean);
+      const dbTotal = countRes[0]?.total || 0;
+      const dbNames = allRes.map((r) => normalizeName(r.name)).filter(Boolean);
 
-      // Fetch Google Sheets data (counts manual signatures added to sheet as well)
-      const gsData = await fetchGoogleSheetsData();
-      const gsTotal = gsData.total || 0;
-      const gsNames = (gsData.names || []).map(normalizeName).filter(Boolean);
-
-      // Merge names: start with DB names (digital), then add any unique manual names from sheet
-      const mergedSet = new Set(dbNames);
-      for (const gn of gsNames) {
-        if (!mergedSet.has(gn)) {
-          mergedSet.add(gn);
-        }
-      }
-      const allNames = Array.from(mergedSet);
-
-      // Total includes digital + manual signatures from Google Sheets
-      const total = Math.max(dbTotal, gsTotal, allNames.length);
-      const recentNames = allNames.slice(0, 12);
+      // Total and names are pulled directly and strictly from the database
+      const total = dbTotal;
+      const recentNames = dbNames.slice(0, 12);
+      const allNames = dbNames;
 
       return new Response(JSON.stringify({ 
         total, 
@@ -122,7 +109,7 @@ export default async (req) => {
         headers: { 
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "public, max-age=10, stale-while-revalidate=30"
+          "Cache-Control": "no-cache"
         }
       });
     } catch (err) {
