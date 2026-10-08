@@ -19,6 +19,25 @@
 <meta name="twitter:title" content="אמנת הנשים החרדיות" />
 <meta name="twitter:description" content="עשרות נשים חרדיות ישבו לנסח אמנה שתרכז את כל צרכי הנשים החרדיות, ותהפוך לתכנית עבודה לנבחרי הציבור בכנסת הבאה. עכשיו תורך לחתום!" />
 <meta name="twitter:image" content="https://haredisurvey.netlify.app/og-amana-1200.png" />
+<meta name="google-site-verification" content="wpadzq20gyC_Or9UPCfA9A_bfMZQsoC0nZnMr5cUlu8" />
+<link rel="canonical" href="https://haredisurvey.netlify.app/amana.html" />
+<meta name="robots" content="index, follow" />
+<meta name="keywords" content="אמנת הנשים החרדיות, אמנת נשים חרדיות, נשים חרדיות, אמנה, תכנית עבודה לנבחרי הציבור, פריימריז הנשים החרדיות" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "אמנת הנשים החרדיות",
+  "headline": "אמנת הנשים החרדיות | תכנית העבודה לנבחרי הציבור",
+  "description": "עשרות נשים חרדיות ישבו לנסח אמנה שתרכז את כל צרכי הנשים החרדיות, ותהפוך לתכנית עבודה לנבחרי הציבור בכנסת הבאה. בואי לקרוא ולחתום!",
+  "url": "https://haredisurvey.netlify.app/amana.html",
+  "inLanguage": "he-IL",
+  "publisher": {
+    "@type": "Organization",
+    "name": "פריימריז הנשים החרדיות"
+  }
+}
+</script>
 <link rel="icon" type="image/png" href="favicon.png" />
 <link rel="apple-touch-icon" href="favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -370,38 +389,133 @@ body {
   font-size: 18px;
 }
 
-/* SIGNATURES PLACEHOLDER SECTION */
+/* SIGNATURES SECTION */
 .signatures-section {
   background: #ffffff;
   border-top: 3px solid #c9a84c;
   border-bottom: 1px solid #d0ccc4;
-  padding: 44px 24px;
-  text-align: center;
+  padding: 48px 24px 60px;
+  text-align: right;
 }
 .signatures-inner {
-  max-width: 820px;
+  max-width: 860px;
   margin: 0 auto;
+}
+.signatures-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 .signatures-title {
   font-family: 'Frank Ruhl Libre', serif;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 900;
   color: #1a2744;
-  margin-bottom: 20px;
+  line-height: 1.2;
+}
+.signatures-sub {
+  font-size: 14.5px;
+  color: #556677;
+  margin-top: 4px;
+}
+.signatures-search-box {
+  position: relative;
+  min-width: 260px;
+  max-width: 340px;
+  flex: 1;
+}
+.signatures-search-box input {
+  width: 100%;
+  height: 42px;
+  padding: 0 38px 0 14px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 14px;
+  border: 1.5px solid #d0ccc4;
+  border-radius: 6px;
+  background: #faf8f5;
+  color: #1a2744;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.signatures-search-box input:focus {
+  border-color: #c9a84c;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.2);
+}
+.signatures-search-box .search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8899aa;
+  pointer-events: none;
+}
+.signatures-meta-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #667788;
+  margin-bottom: 10px;
+  padding: 0 2px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.signatures-meta-bar strong {
+  color: #1a2744;
+  font-weight: 700;
+}
+.scroll-tip-label {
+  color: #8b6b28;
+  background: rgba(201, 168, 76, 0.12);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-/* 3-COLUMN RECENT SIGNATURES GRID */
+/* SCROLLABLE CONTAINER FOR ALL SIGNATURES */
+.all-signatures-scroll-box {
+  max-height: 310px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1.5px solid #e2ded5;
+  border-radius: 8px;
+  padding: 16px;
+  background: #faf8f5;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.03);
+  scrollbar-width: thin;
+  scrollbar-color: #c9a84c #f0ede6;
+}
+.all-signatures-scroll-box::-webkit-scrollbar {
+  width: 7px;
+}
+.all-signatures-scroll-box::-webkit-scrollbar-track {
+  background: #f0ede6;
+  border-radius: 4px;
+}
+.all-signatures-scroll-box::-webkit-scrollbar-thumb {
+  background: #c9a84c;
+  border-radius: 4px;
+}
+.all-signatures-scroll-box::-webkit-scrollbar-thumb:hover {
+  background: #b8973b;
+}
+
+/* SIGNATURES GRID */
 .recent-signatures-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
 }
 .recent-sig-card {
-  background: #f8f6f2;
-  border: 1px solid #e2ded5;
+  background: #ffffff;
+  border: 1px solid #e4dfd7;
   border-right: 3px solid #c9a84c;
-  padding: 12px 14px;
+  padding: 10px 14px;
   text-align: right;
   font-size: 14px;
   font-weight: 600;
@@ -409,19 +523,118 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.recent-sig-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.06);
 }
 .recent-sig-card::before {
   content: '✓';
-  color: #c9a84c;
+  color: #2e7d32;
   font-weight: 800;
+  font-size: 13px;
 }
-@media (max-width: 600px) {
+.no-results-card {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 32px 16px;
+  color: #778899;
+  font-size: 14px;
+}
+
+/* PART 2: MANUAL SIGNATURES SECTION */
+.manual-signatures-section {
+  margin-top: 50px;
+  padding-top: 40px;
+  border-top: 2px dashed #dcd7ce;
+  text-align: center;
+}
+.manual-badge {
+  display: inline-block;
+  background: rgba(201, 168, 76, 0.15);
+  color: #8b6b28;
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+.manual-title {
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #1a2744;
+  margin-bottom: 6px;
+}
+.manual-sub {
+  font-size: 14.5px;
+  color: #556677;
+  max-width: 600px;
+  margin: 0 auto 22px;
+}
+.manual-image-card {
+  max-width: 100%;
+  border: 1px solid #d5cfc4;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+  background: #ffffff;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.manual-image-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(0,0,0,0.12);
+}
+.manual-image-link {
+  display: block;
+  position: relative;
+  text-decoration: none;
+}
+.manual-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.zoom-hint-banner {
+  background: #1a2744;
+  color: #c9a84c;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-top: 1px solid rgba(201, 168, 76, 0.3);
+  transition: background 0.2s;
+}
+.manual-image-card:hover .zoom-hint-banner {
+  background: #24355a;
+  color: #ffffff;
+}
+
+@media (max-width: 680px) {
+  .signatures-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .signatures-search-box {
+    max-width: 100%;
+  }
   .recent-signatures-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .signatures-meta-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
-@media (max-width: 400px) {
+@media (max-width: 440px) {
   .recent-signatures-grid {
     grid-template-columns: 1fr;
   }
@@ -789,15 +1002,15 @@ body {
         <h2 class="topic-title">בריאות האישה</h2>
       </div>
       <div class="topic-body">
-        <p class="topic-summary">כדי שכל אישה חרדית תזכה לבריאות גופנית ונפשית ולגישה שוויונית לשירותי בריאות מותאמים, נפעל לקידום קמפיינים ממוקדי מגזר מגיל התיכון (בדגש על BRCA, אנדומטריוזיס ורפואה מונעת), להנגשת מידע מסודר ובדיקות סקר מסובסדות בריכוזים נשיים ובמקוואות טהרה, ולהפעלת ניידות לבדיקות מוקדמות לגילוי סרטן השד וצוואר הרחם. כדי למנוע דיכאון לאחר לידה, נפעל להקמת מערך סיוע לנשים סביב הריון ולידה, ולקידום שיח זוגי ומשפחתי. נדאג להפעלת מערך חובשות וכוננות חרדיות ואמבולנסים ייעודיים לנשים במצבי חירום רפואיים ולידה. נדאג לנירמול הפנייה למרפאות בריאות הנפש, ליצירת מעטפת קהילתית תומכת, להבטחת טיפול רגשי מוסמך נטול שרלטנות, ולאכיפת קודי אתיקה ושלילת רישיונות למטפלים מפרי חוק.</p>
+        <p class="topic-summary">כדי שכל אישה חרדית תזכה לבריאות גופנית ונפשית ולגישה שוויונית לשירותי בריאות מותאמים, נפעל לקידום קמפיינים ממוקדי מגזר מגיל התיכון (בדגש על BRCA, אנדומטריוזיס ורפואה מונעת), להנגשת מידע מסודר ובדיקות סקר מסובסדות בריכוזים נשיים ובמקוואות טהרה, ולהפעלת ניידות לבדיקות מוקדמות לגילוי סרטן השד וצוואר הרחם. כדי למנוע דיכאון לאחר לידה, נפעל להקמת מערך סיוע לנשים סביב הריון ולידה, ולקידום שיח זוגי ומשפחתי. נדאג להפעלת מערך חובשות וכוננות חרדיות ואמבולנסים ייעודיים לנשים במצבי חירום רפואיים ולידה. נדאג לנירמול הפנייה למרפאות בריאות הנפש, ליצירת מעטפת קהילתית תומכת, להבטחת טיפול רגשי מוסמך נטול שרלטנות, ולאכיפת קודי אתיקה ושלילת רישיונות למטפלים מפרי חוק. תמיכה בהליכי שימור פוריות לרווקות בגילאי 30 ומעלה.</p>
         <div class="expand-wrapper">
           <button type="button" class="expand-btn" aria-expanded="false" aria-controls="bullets-2" onclick="toggleTopic(this, 'bullets-2')">
-            <span class="btn-text">להרחבה (10 סעיפים)</span>
+            <span class="btn-text">להרחבה (11 סעיפים)</span>
             <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div id="bullets-2" class="topic-bullets-content" hidden>
             <ul class="bullets-list">
-              <li>הרחבת הקמפיינים לבריאות האישה, בדגש על BRCA ועל מודעות לרפואה מונעת ולבדיקות סקר, בפרסום ממוקד למגזר החרדי.</li><li>הנגשת מידע מסודר על בדיקות מקדימות, למשל בעלונים או בשיחות טלפוניות יזומות, מסובסדות בקופות החולים, ועל אפשרות פנייה לרופאות. הנגשת מידע על בריאות האישה בריכוזים נשיים כגון מקווה טהרה.</li><li>הנגשת בדיקות מקדימות לסרטן צוואר הרחם וסרטן השד באמצעות ניידות רפואיות.</li><li>הקמת מערך סיוע וזיהוי צרכים לנשים בתקופת הריון ולידה, למניעת דיכאון לפני ואחרי לידה.</li><li>קידום שיח פרטני וזוגי לפני הנישואין ואחריהם בנושא תכנון משפחה, בליווי עובדות סוציאליות המיומנות בזיהוי אלימות במשפחה.</li><li>שינוי ועדות ההפלה כך שיתנהלו בגישה טיפולית-סוציאלית, ולא בגישה שיפוטית/משפטית.</li><li>הפעלת חובשות וכוננות חרדיות ברפואת חירום בכל ריכוז חרדי, לטיפול מכבד ומותאם בנשים במצבי משבר רפואי. הקמת נקודות הזנקה ואמבולנסים לנשים בלבד למקרי לידה ומצבי חירום רפואיים המצריכים רגישות יתר לפרטיות המטופלת.</li><li>נירמול פנייה לטיפול בבריאות הנפש והעלאת מודעות, והקמת מעטפת קהילתית תומכת.</li><li>מניעת פעילות של מטפלי בריאות הנפש חסרי הכשרה מקצועית. הקפדה על קוד האתיקה ושלילת רישיונות לאנשי רפואה ורווחה שעוברים בקונסיסטנטיות על הקוד האתי.</li><li>חינוך לפנייה לאנשי מקצוע בתחומם, ולא לעסקנים, מכרים, בני משפחה ואנשי דת.</li>
+              <li>הרחבת הקמפיינים לבריאות האישה, בדגש על BRCA ועל מודעות לרפואה מונעת ולבדיקות סקר, בפרסום ממוקד למגזר החרדי.</li><li>הנגשת מידע מסודר על בדיקות מקדימות, למשל בעלונים או בשיחות טלפוניות יזומות, מסובסדות בקופות החולים, ועל אפשרות פנייה לרופאות. הנגשת מידע על בריאות האישה בריכוזים נשיים כגון מקווה טהרה.</li><li>הנגשת בדיקות מקדימות לסרטן צוואר הרחם וסרטן השד באמצעות ניידות רפואיות.</li><li>הקמת מערך סיוע וזיהוי צרכים לנשים בתקופת הריון ולידה, למניעת דיכאון לפני ואחרי לידה.</li><li>קידום שיח פרטני וזוגי לפני הנישואין ואחריהם בנושא תכנון משפחה, בליווי עובדות סוציאליות המיומנות בזיהוי אלימות במשפחה.</li><li>שינוי ועדות ההפלה כך שיתנהלו בגישה טיפולית-סוציאלית, ולא בגישה שיפוטית/משפטית.</li><li>הפעלת חובשות וכוננות חרדיות ברפואת חירום בכל ריכוז חרדי, לטיפול מכבד ומותאם בנשים במצבי משבר רפואי. הקמת נקודות הזנקה ואמבולנסים לנשים בלבד למקרי לידה ומצבי חירום רפואיים המצריכים רגישות יתר לפרטיות המטופלת.</li><li>נירמול פנייה לטיפול בבריאות הנפש והעלאת מודעות, והקמת מעטפת קהילתית תומכת.</li><li>מניעת פעילות של מטפלי בריאות הנפש חסרי הכשרה מקצועית. הקפדה על קוד האתיקה ושלילת רישיונות לאנשי רפואה ורווחה שעוברים בקונסיסטנטיות על הקוד האתי.</li><li>חינוך לפנייה לאנשי מקצוע בתחומם, ולא לעסקנים, מכרים, בני משפחה ואנשי דת.</li><li>סבסוד ותמיכה בהליכי שימור פוריות לנשים רווקות וגרושות ללא ילדים בגילאי 30 ומעלה.</li>
             </ul>
           </div>
         </div>
@@ -975,10 +1188,10 @@ body {
     <article class="charter-topic-card" id="topic-11">
       <div class="topic-header">
         <span class="topic-number">פרק 11</span>
-        <h2 class="topic-title">שירות לאומי-אזרחי</h2>
+        <h2 class="topic-title">התנדבות בקהילה</h2>
       </div>
       <div class="topic-body">
-        <p class="topic-summary">נפעל להקמת מסגרת שירות לאומי התנדבותית לנערות חרדיות החפצות בכך.</p>
+        <p class="topic-summary">נפעל להקמת מסגרת שירות אזרחי התנדבותית מותאמת לציבור החרדי לבנות המעוניינות בכך.</p>
         <div class="expand-wrapper">
           <button type="button" class="expand-btn" aria-expanded="false" aria-controls="bullets-11" onclick="toggleTopic(this, 'bullets-11')">
             <span class="btn-text">להרחבה (1 סעיפים)</span>
@@ -986,7 +1199,7 @@ body {
           </button>
           <div id="bullets-11" class="topic-bullets-content" hidden>
             <ul class="bullets-list">
-              <li>הקמת מסגרות שירות לאומי לציבור החרדי במודל התנדבותי, בהדרכת מדריכות חרדיות, בשילוב חוגי תורה ובשמירה מלאה על הצניעות ועל מעמדה של בת השירות כחרדית. השירות יכלול מסגרת לבוגרות י"ב המשלבת מדרשה ולימודים תורניים-השקפתיים עם שירות במוסדות חרדיים, בממ"ח, בעמותות חסד חרדיות ועוד.</li>
+              <li>הקמת מסגרות שירות אזרחי לציבור החרדי במודל התנדבותי, בהדרכת מדריכות חרדיות, בשילוב חוגי תורה ובשמירה מלאה על הצניעות ועל מעמדה של בת השירות כחרדית. השירות יכלול מסגרת לבוגרות י"ב המשלבת מדרשה ולימודים תורניים-השקפתיים עם שירות במוסדות חרדיים, בממ"ח, בעמותות חסד חרדיות ועוד.</li>
             </ul>
           </div>
         </div>
@@ -1037,22 +1250,66 @@ body {
   </div>
 </section>
 
-<!-- RECENT SIGNATURES SECTION -->
+<!-- SIGNATURES SECTION -->
 <section class="signatures-section" id="signatures">
   <div class="signatures-inner">
-    <h2 class="signatures-title">חתימות התמיכה באמנה</h2>
     
-    <!-- 3 COLUMNS x 4 ROWS GRID FOR RECENT 12 PUBLIC SIGNATURES -->
-    <div class="recent-signatures-grid" id="recent-signatures-list">
-      <!-- Will be populated dynamically or fallback -->
+    <!-- PART 1: DIGITAL SIGNATURES -->
+    <div class="signatures-block">
+      <div class="signatures-header-row">
+        <div>
+          <h2 class="signatures-title">חתימות התמיכה באמנה</h2>
+          <p class="signatures-sub">נשים חרדיות שתמכו וחתמו באופן דיגיטלי באתר</p>
+        </div>
+        <div class="signatures-search-box">
+          <input 
+            type="text" 
+            id="signatures-search-input" 
+            placeholder="חיפוש חותמת לפי שם..." 
+            aria-label="חיפוש חותמת"
+            oninput="filterSignatures(this.value)"
+          />
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+      </div>
+
+      <div class="signatures-meta-bar">
+        <span id="signatures-counter-label">טוען חתימות...</span>
+        <span class="scroll-tip-label">💡 ניתן לגלול בתיבה כדי לראות את כל החותמות</span>
+      </div>
+
+      <!-- SCROLLABLE CONTAINER FOR ALL SIGNATURES -->
+      <div class="all-signatures-scroll-box" id="all-signatures-scroll-container">
+        <div class="recent-signatures-grid" id="recent-signatures-list">
+          <!-- Populated dynamically or fallback -->
+        </div>
+      </div>
     </div>
 
-    <!-- MANUAL SIGNATURES IMAGE CONTAINER -->
-    <div style="margin-top: 32px;" id="manual-signatures-wrap">
-      <!-- בעת קבלת תמונת החתימות הידניות, היא תוצג כאן:
-           <img src="signatures-manual.png" alt="חתימות ידניות על אמנת הנשים החרדיות" style="max-width:100%; height:auto; border:1px solid #d0ccc4; box-shadow:0 4px 12px rgba(0,0,0,0.08);" />
-      -->
+    <!-- PART 2: MANUAL SIGNATURES (SEPARATE SECTION) -->
+    <div class="manual-signatures-section" id="manual-signatures-wrap">
+      <div class="manual-signatures-header">
+        <div class="manual-badge">חתימות ידניות</div>
+        <h3 class="manual-title">חתימות ידניות ממעמד השקת האמנה</h3>
+        <p class="manual-sub">חתימות מקוריות של נשות הציבור, הפעילות והמשתתפות בכנסי ומפגשי האמנה</p>
+      </div>
+
+      <div class="manual-image-card">
+        <a href="signatures-manual.png" target="_blank" title="לחצי לפתיחת תמונת החתימות בגודל מלא" class="manual-image-link">
+          <img 
+            src="signatures-manual.png" 
+            alt="חתימות ידניות על אמנת הנשים החרדיות" 
+            loading="lazy" 
+            class="manual-img"
+          />
+          <div class="zoom-hint-banner">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            <span>לחצי לצפייה בתמונת החתימות המקורית בהגדלה מלאה</span>
+          </div>
+        </a>
+      </div>
     </div>
+
   </div>
 </section>
 
@@ -1108,7 +1365,7 @@ function collapseAllTopics() {
   });
 }
 
-// Sample initial signatures list (12 entries for 3x4 grid)
+// Signatures data & rendering logic
 const RECENT_NAMES_FALLBACK = [
   "רחלי מ.", "חנה ק.", "מיכל ש.",
   "אסתר ב.", "ציפי ל.", "תמי ז.",
@@ -1116,17 +1373,71 @@ const RECENT_NAMES_FALLBACK = [
   "שרה נ.", "דבורה ר.", "רבקה פ."
 ];
 
-function populateRecentSignatures(list) {
-  const container = document.getElementById('recent-signatures-list');
-  if (!container) return;
-  
-  const displayList = (list && list.length > 0) ? list.slice(-12).reverse() : RECENT_NAMES_FALLBACK;
-  container.innerHTML = displayList.map(name => `<div class="recent-sig-card">${name}</div>`).join('');
-}
-
+let allSignaturesList = [];
 const AMANA_API_URL = '/api/amana';
 const INITIAL_OFFSET = 0;
 let currentSignaturesCount = 0;
+
+function renderSignaturesList(list, searchQuery = '') {
+  const container = document.getElementById('recent-signatures-list');
+  const counterLabel = document.getElementById('signatures-counter-label');
+  if (!container) return;
+
+  const displayList = (list && list.length > 0) ? list : RECENT_NAMES_FALLBACK;
+
+  if (displayList.length === 0) {
+    container.innerHTML = `<div class="no-results-card">לא נמצאו חותמות התואמות לחיפוש "${escapeHtml(searchQuery)}"</div>`;
+    if (counterLabel) {
+      counterLabel.innerHTML = `נמצאו <strong>0</strong> חותמות מתוך ${allSignaturesList.length}`;
+    }
+    return;
+  }
+
+  container.innerHTML = displayList.map(name => {
+    let displayName = escapeHtml(name);
+    if (searchQuery) {
+      const regex = new RegExp(`(${escapeRegExp(searchQuery)})`, 'gi');
+      displayName = displayName.replace(regex, '<mark style="background:#fce8a6;color:#1a2744;padding:0 2px;border-radius:2px;">$1</mark>');
+    }
+    return `<div class="recent-sig-card">${displayName}</div>`;
+  }).join('');
+
+  if (counterLabel) {
+    if (searchQuery) {
+      counterLabel.innerHTML = `נמצאו <strong>${displayList.length}</strong> חותמות מתוך ${allSignaturesList.length}`;
+    } else {
+      counterLabel.innerHTML = `מוצגות <strong>${displayList.length}</strong> חותמות גלויות מתוך ${currentSignaturesCount || displayList.length} תומכות באמנה`;
+    }
+  }
+}
+
+function filterSignatures(query) {
+  const trimmed = (query || '').trim().toLowerCase();
+  if (!trimmed) {
+    renderSignaturesList(allSignaturesList, '');
+    return;
+  }
+
+  const filtered = allSignaturesList.filter(name => 
+    (name || '').toLowerCase().includes(trimmed)
+  );
+
+  renderSignaturesList(filtered, query);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 function fetchSignaturesCount() {
   fetch(AMANA_API_URL)
@@ -1137,16 +1448,29 @@ function fetchSignaturesCount() {
           currentSignaturesCount = data.total + INITIAL_OFFSET;
           updateCounterDisplay(currentSignaturesCount);
         }
-        if (Array.isArray(data.recentNames)) {
-          populateRecentSignatures(data.recentNames);
+
+        // Check if allNames or recentNames is provided
+        const names = Array.isArray(data.allNames) && data.allNames.length > 0 
+          ? data.allNames 
+          : (Array.isArray(data.recentNames) ? data.recentNames : RECENT_NAMES_FALLBACK);
+
+        allSignaturesList = names;
+
+        // If search input has a current query, re-apply it; otherwise show all
+        const searchInput = document.getElementById('signatures-search-input');
+        if (searchInput && searchInput.value.trim()) {
+          filterSignatures(searchInput.value);
         } else {
-          populateRecentSignatures(RECENT_NAMES_FALLBACK);
+          renderSignaturesList(allSignaturesList);
         }
       }
     })
     .catch(err => {
       console.log('Error fetching signature count:', err);
-      populateRecentSignatures(RECENT_NAMES_FALLBACK);
+      if (allSignaturesList.length === 0) {
+        allSignaturesList = RECENT_NAMES_FALLBACK;
+        renderSignaturesList(allSignaturesList);
+      }
     });
 }
 
@@ -1168,9 +1492,14 @@ function submitSignature() {
   const formInner = document.getElementById('sign-form-inner');
   const submitBtn = document.querySelector('.sign-submit-btn');
 
-  const name = nameInput ? nameInput.value.trim() : '';
+  let name = nameInput ? nameInput.value.trim() : '';
   const email = emailInput ? emailInput.value.trim() : '';
   const hideName = hideNameInput ? hideNameInput.checked : false;
+
+  // Auto-correct Avia Revach spelling if entered as רווי
+  if (name === 'אביה רווי' || name.includes('רווי')) {
+    name = 'אביה רווח';
+  }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!name || !email || !emailRegex.test(email)) {
@@ -1198,7 +1527,7 @@ function submitSignature() {
     timestamp: new Date().toISOString()
   };
 
-  // Send to Netlify Serverless Function (saves to Postgres DB and Google Sheets)
+  // Send to Netlify API
   fetch(AMANA_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1214,16 +1543,18 @@ function submitSignature() {
     updateCounterDisplay(currentSignaturesCount);
 
     if (!hideName) {
-      const container = document.getElementById('recent-signatures-list');
-      if (container) {
-        const newCard = document.createElement('div');
-        newCard.className = 'recent-sig-card';
-        newCard.textContent = name;
-        container.insertBefore(newCard, container.firstChild);
-        if (container.children.length > 12) {
-          container.removeChild(container.lastChild);
-        }
+      // Add immediately to the beginning of the list
+      allSignaturesList.unshift(name);
+      const searchInput = document.getElementById('signatures-search-input');
+      if (searchInput && searchInput.value.trim()) {
+        filterSignatures(searchInput.value);
+      } else {
+        renderSignaturesList(allSignaturesList);
       }
+      
+      // Scroll to top of list container
+      const scrollBox = document.getElementById('all-signatures-scroll-container');
+      if (scrollBox) scrollBox.scrollTop = 0;
     }
 
     if (formInner) formInner.style.display = 'none';

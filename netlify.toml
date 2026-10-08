@@ -1,3 +1,13 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+
+[[redirects]]
+  from = "/amana"
+  to = "/amana.html"
+  status = 200
+
+[[redirects]]
+  from = "/אמנה"
+  to = "/amana.html"
+  status = 200

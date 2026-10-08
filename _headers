@@ -1,0 +1,6 @@
+/images/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET
+
+/צללית.png
+  Access-Control-Allow-Origin: *

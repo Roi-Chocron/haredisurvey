@@ -2,12 +2,54 @@ import { getDatabase } from "@netlify/database";
 
 const GOOGLE_SHEETS_AMANA_WEBHOOK = "https://script.google.com/macros/s/AKfycbzpOrk30NTdDkRrIJMFhRuXtRpJlfJaOJabem2t9xtcdu1J2TupIPUXkNl7BBYOBtEg2w/exec";
 
+// In-memory cache for Google Sheets data to keep API response times ultra-fast (<50ms)
+let sheetCache = {
+  timestamp: 0,
+  total: 0,
+  names: []
+};
+const CACHE_TTL_MS = 25000; // 25 seconds cache
+
+async function fetchGoogleSheetsData() {
+  const now = Date.now();
+  if (now - sheetCache.timestamp < CACHE_TTL_MS && sheetCache.total > 0) {
+    return sheetCache;
+  }
+  try {
+    const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, { signal: AbortSignal.timeout(2500) });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.total === "number") {
+        const names = Array.isArray(data.allNames) 
+          ? data.allNames 
+          : (Array.isArray(data.recentNames) ? data.recentNames : []);
+        sheetCache = {
+          timestamp: now,
+          total: data.total || 0,
+          names: names
+        };
+      }
+    }
+  } catch (e) {
+    // If Google Sheets is slow or times out, proceed seamlessly with cached or DB data
+  }
+  return sheetCache;
+}
+
+function normalizeName(name) {
+  if (!name) return "";
+  const trimmed = name.trim();
+  if (trimmed === "אביה רווי" || trimmed.includes("רווי")) {
+    return "אביה רווח";
+  }
+  return trimmed;
+}
+
 export default async (req) => {
   const method = req.method.toUpperCase();
-
   const url = new URL(req.url);
 
-  // GET: Return signatures count and recent visible names (or export all for admin/sync)
+  // GET: Return signatures count, recent visible names, and ALL visible names for scroll/search
   if (method === "GET") {
     // Admin / Inspection: export all signatures
     if (url.searchParams.get("export") === "1" || url.searchParams.get("export") === "all") {
@@ -20,7 +62,10 @@ export default async (req) => {
         `;
         return new Response(JSON.stringify({ total: allSignatures.length, signatures: allSignatures }), {
           status: 200,
-          headers: { "Content-Type": "application/json" }
+          headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
         });
       } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), {
@@ -30,99 +75,75 @@ export default async (req) => {
       }
     }
 
-    // Admin / Sync: push signatures from database to Google Sheets
-    if (url.searchParams.get("sync") === "1" || url.searchParams.get("sync") === "all") {
-      try {
-        const db = getDatabase();
-        const fromId = parseInt(url.searchParams.get("fromId") || "0", 10);
-        const toId = url.searchParams.get("toId") ? parseInt(url.searchParams.get("toId"), 10) : null;
-        
-        let rows;
-        if (toId) {
-          rows = await db.sql`
-            SELECT id, name, email, hide_name, created_at 
-            FROM amana_signatures 
-            WHERE id > ${fromId} AND id <= ${toId}
-            ORDER BY id ASC
-          `;
-        } else {
-          rows = await db.sql`
-            SELECT id, name, email, hide_name, created_at 
-            FROM amana_signatures 
-            WHERE id > ${fromId}
-            ORDER BY id ASC
-          `;
-        }
-
-        const results = [];
-        // Process in small batches of 3 to avoid Google Apps Script rate limits
-        for (let i = 0; i < rows.length; i += 3) {
-          const batch = rows.slice(i, i + 3);
-          await Promise.all(batch.map(async (row) => {
-            try {
-              const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: JSON.stringify({
-                  action: "sign_amana",
-                  name: row.name,
-                  email: row.email,
-                  hideName: Boolean(row.hide_name),
-                  timestamp: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString()
-                }),
-                signal: AbortSignal.timeout(10000)
-              });
-              results.push({ id: row.id, name: row.name, email: row.email, ok: res.ok });
-            } catch (postErr) {
-              results.push({ id: row.id, name: row.name, email: row.email, ok: false, error: postErr.message });
-            }
-          }));
-          if (i + 3 < rows.length) {
-            await new Promise((r) => setTimeout(r, 400));
-          }
-        }
-
-        return new Response(JSON.stringify({ syncedCount: results.length, details: results }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" }
-        });
-      } catch (syncErr) {
-        return new Response(JSON.stringify({ error: syncErr.message }), {
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-        });
-      }
-    }
-
     try {
       const db = getDatabase();
+
+      // Proactively fix any typo of 'רווי' to 'רווח' in database
+      try {
+        await db.sql`UPDATE amana_signatures SET name = 'אביה רווח' WHERE name LIKE '%רווי%'`;
+      } catch (fixErr) {
+        // Non-critical if table is not yet created
+      }
+
       const countRes = await db.sql`SELECT COUNT(*)::int AS total FROM amana_signatures`;
-      const recentRes = await db.sql`
+      const allRes = await db.sql`
         SELECT name FROM amana_signatures 
         WHERE hide_name = false 
-        ORDER BY id DESC 
-        LIMIT 12
+        ORDER BY id DESC
       `;
 
-      const total = countRes[0]?.total || 0;
-      const recentNames = recentRes.map((r) => r.name);
+      let dbTotal = countRes[0]?.total || 0;
+      let dbNames = allRes.map((r) => normalizeName(r.name)).filter(Boolean);
 
-      return new Response(JSON.stringify({ total, recentNames }), {
+      // Fetch Google Sheets data (counts manual signatures added to sheet as well)
+      const gsData = await fetchGoogleSheetsData();
+      const gsTotal = gsData.total || 0;
+      const gsNames = (gsData.names || []).map(normalizeName).filter(Boolean);
+
+      // Merge names: start with DB names (digital), then add any unique manual names from sheet
+      const mergedSet = new Set(dbNames);
+      for (const gn of gsNames) {
+        if (!mergedSet.has(gn)) {
+          mergedSet.add(gn);
+        }
+      }
+      const allNames = Array.from(mergedSet);
+
+      // Total includes digital + manual signatures from Google Sheets
+      const total = Math.max(dbTotal, gsTotal, allNames.length);
+      const recentNames = allNames.slice(0, 12);
+
+      return new Response(JSON.stringify({ 
+        total, 
+        recentNames,
+        allNames 
+      }), {
         status: 200,
-        headers: { "Content-Type": "application/json" }
+        headers: { 
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "public, max-age=10, stale-while-revalidate=30"
+        }
       });
     } catch (err) {
       console.error("Database query error:", err);
       // Fallback: try fetching from Google Sheets if database isn't populated or error occurs
       try {
-        const gsRes = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK);
-        const gsData = await gsRes.json();
-        return new Response(JSON.stringify(gsData), {
+        const gsData = await fetchGoogleSheetsData();
+        const gsNames = (gsData.names || []).map(normalizeName).filter(Boolean);
+        return new Response(JSON.stringify({ 
+          total: gsData.total || gsNames.length, 
+          recentNames: gsNames.slice(0, 12),
+          allNames: gsNames
+        }), {
           status: 200,
-          headers: { "Content-Type": "application/json" }
+          headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
         });
       } catch (e) {
-        return new Response(JSON.stringify({ total: 0, recentNames: [] }), {
+        return new Response(JSON.stringify({ total: 0, recentNames: [], allNames: [] }), {
           status: 200,
           headers: { "Content-Type": "application/json" }
         });
@@ -134,70 +155,7 @@ export default async (req) => {
   if (method === "POST") {
     try {
       const body = await req.json();
-
-      // Support manual sync via POST
-      if (body.action === "sync_to_sheets") {
-        try {
-          const db = getDatabase();
-          const fromId = body.fromId ? parseInt(body.fromId, 10) : 0;
-          const toId = body.toId ? parseInt(body.toId, 10) : null;
-          let rows;
-          if (toId) {
-            rows = await db.sql`
-              SELECT id, name, email, hide_name, created_at 
-              FROM amana_signatures 
-              WHERE id > ${fromId} AND id <= ${toId}
-              ORDER BY id ASC
-            `;
-          } else {
-            rows = await db.sql`
-              SELECT id, name, email, hide_name, created_at 
-              FROM amana_signatures 
-              WHERE id > ${fromId}
-              ORDER BY id ASC
-            `;
-          }
-
-          const results = [];
-          for (let i = 0; i < rows.length; i += 3) {
-            const batch = rows.slice(i, i + 3);
-            await Promise.all(batch.map(async (row) => {
-              try {
-                const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: JSON.stringify({
-                    action: "sign_amana",
-                    name: row.name,
-                    email: row.email,
-                    hideName: Boolean(row.hide_name),
-                    timestamp: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString()
-                  }),
-                  signal: AbortSignal.timeout(10000)
-                });
-                results.push({ id: row.id, name: row.name, email: row.email, ok: res.ok });
-              } catch (postErr) {
-                results.push({ id: row.id, name: row.name, email: row.email, ok: false, error: postErr.message });
-              }
-            }));
-            if (i + 3 < rows.length) {
-              await new Promise((r) => setTimeout(r, 400));
-            }
-          }
-
-          return new Response(JSON.stringify({ syncedCount: results.length, details: results }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" }
-          });
-        } catch (syncErr) {
-          return new Response(JSON.stringify({ error: syncErr.message }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" }
-          });
-        }
-      }
-
-      const { name, email, hideName } = body;
+      let { name, email, hideName } = body;
 
       if (!name || !email) {
         return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -206,7 +164,9 @@ export default async (req) => {
         });
       }
 
-      // 1. Save to Netlify Postgres Database & 2. Forward to Google Sheets concurrently, awaiting both
+      name = normalizeName(name);
+
+      // 1. Save to Netlify Postgres Database
       const saveDbPromise = (async () => {
         try {
           const db = getDatabase();
@@ -221,6 +181,7 @@ export default async (req) => {
         }
       })();
 
+      // 2. Forward to Google Sheets
       const forwardSheetPromise = (async () => {
         try {
           const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
@@ -233,7 +194,7 @@ export default async (req) => {
               hideName: Boolean(hideName),
               timestamp: new Date().toISOString()
             }),
-            signal: AbortSignal.timeout(10000)
+            signal: AbortSignal.timeout(8000)
           });
           return res.ok;
         } catch (sheetErr) {
@@ -242,12 +203,17 @@ export default async (req) => {
         }
       })();
 
-      // Await both promises so the serverless function does not exit/freeze before completion
+      // Invalidate sheet cache so next GET reflects the new signature
+      sheetCache.timestamp = 0;
+
       await Promise.all([saveDbPromise, forwardSheetPromise]);
 
       return new Response(JSON.stringify({ status: "success" }), {
         status: 200,
-        headers: { "Content-Type": "application/json" }
+        headers: { 
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
       });
     } catch (err) {
       console.error("Error processing POST request:", err);
