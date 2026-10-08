@@ -153,6 +153,27 @@ export default async (req) => {
 
       name = normalizeName(name);
 
+      // Check if email already signed to prevent duplicates in DB and Sheets
+      try {
+        const db = getDatabase();
+        const existing = await db.sql`
+          SELECT id FROM amana_signatures 
+          WHERE LOWER(TRIM(email)) = ${email.toLowerCase().trim()} 
+          LIMIT 1
+        `;
+        if (existing.length > 0) {
+          return new Response(JSON.stringify({ status: "success", alreadySigned: true }), {
+            status: 200,
+            headers: { 
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*"
+            }
+          });
+        }
+      } catch (checkErr) {
+        console.error("Duplicate check error:", checkErr);
+      }
+
       // 1. Save to Netlify Postgres Database
       const saveDbPromise = (async () => {
         try {

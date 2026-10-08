@@ -92,8 +92,27 @@ function doPost(e) {
     var hideName = Boolean(data.hideName);
     var timestamp = data.timestamp ? new Date(data.timestamp) : new Date();
     
-    if (name === "אביה רווי" || name.indexOf("רווי") !== -1) {
+    if (name === "אביה רוווי" || name.indexOf("רווי") !== -1) {
       name = "אביה רווח";
+    }
+    
+    // בדיקת מניעת כפילויות לפי אימייל: אם האימייל כבר קיים בגיליון, לא נוסיף אותו שוב
+    if (email) {
+      var lastRowCheck = sheet.getLastRow();
+      if (lastRowCheck > 1) {
+        var emailColValues = sheet.getRange("C2:C" + lastRowCheck).getValues();
+        var cleanEmail = email.toLowerCase().trim();
+        for (var eIdx = 0; eIdx < emailColValues.length; eIdx++) {
+          var existingEmail = (emailColValues[eIdx][0] || "").toString().toLowerCase().trim();
+          if (existingEmail && existingEmail === cleanEmail) {
+            return ContentService.createTextOutput(JSON.stringify({ 
+              status: "already_exists", 
+              message: "חתימה זו כבר קיימת בגיליון",
+              row: eIdx + 2 
+            })).setMimeType(ContentService.MimeType.JSON);
+          }
+        }
+      }
     }
     
     // מציאת השורה הריקה הראשונה בעמודה B (שם מלא)
@@ -140,4 +159,46 @@ function findFirstEmptyRow(sheet) {
   }
   
   return lastRow + 1;
+}
+
+/**
+ * פונקציית שירות להסרת כפילויות ובדיקות ישירות מתוך Google Apps Script:
+ * מוחקת שורות ריקות, שורות בדיקה (test@test.com) ושורות כפולות עם אותו אימייל.
+ * להפעלה: יש לבחור בפונקציה זו ב-Apps Script וללחוץ 'Run' / 'הפעל'.
+ */
+function cleanDuplicatesFromSheet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return;
+  
+  var range = sheet.getRange(2, 1, lastRow - 1, 4);
+  var values = range.getValues();
+  var seenEmails = {};
+  var rowsToDelete = []; // נאסוף שורות למחיקה (מהסוף להתחלה)
+  
+  for (var i = 0; i < values.length; i++) {
+    var actualRowIndex = i + 2; // שורה אמיתית בגיליון
+    var name = (values[i][1] || "").toString().trim();
+    var email = (values[i][2] || "").toString().toLowerCase().trim();
+    
+    // זיהוי שורות ריקות או בדיקה
+    if (!email || email === "test@test.com" || email === "sarah.auto.test@example.com" || name === "בדיקה") {
+      rowsToDelete.push(actualRowIndex);
+      continue;
+    }
+    
+    if (seenEmails[email]) {
+      // כפילות!
+      rowsToDelete.push(actualRowIndex);
+    } else {
+      seenEmails[email] = true;
+    }
+  }
+  
+  // מחיקת השורות מהסוף להתחלה כדי לשמור על האינדקסים
+  for (var j = rowsToDelete.length - 1; j >= 0; j--) {
+    sheet.deleteRow(rowsToDelete[j]);
+  }
+  
+  Logger.log("נמחקו " + rowsToDelete.length + " שורות כפולות/בדיקה בהצלחה.");
 }
