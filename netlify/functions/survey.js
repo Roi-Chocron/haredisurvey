@@ -69,35 +69,45 @@ export default async (req) => {
         }
       }
 
-      // 1. Save to Netlify Postgres Database
-      try {
-        const db = getDatabase();
-        await db.sql`
-          INSERT INTO survey_votes (type, name, phone, email, votes)
-          VALUES (${type || "vote"}, ${name}, ${phone}, ${email || ""}, ${votes || ""})
-        `;
-      } catch (dbErr) {
-        console.error("Error saving vote to database:", dbErr);
-      }
+      // 1. Save to Netlify Postgres Database & 2. Forward to Google Sheets concurrently, awaiting both
+      const saveDbPromise = (async () => {
+        try {
+          const db = getDatabase();
+          await db.sql`
+            INSERT INTO survey_votes (type, name, phone, email, votes)
+            VALUES (${type || "vote"}, ${name}, ${phone}, ${email || ""}, ${votes || ""})
+          `;
+          return true;
+        } catch (dbErr) {
+          console.error("Error saving vote to database:", dbErr);
+          return false;
+        }
+      })();
 
-      // 2. Forward to Google Sheets asynchronously (non-blocking, so user gets immediate response)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-      fetch(GOOGLE_SHEETS_SURVEY_WEBHOOK, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: type || "vote",
-          name,
-          phone,
-          email: email || "",
-          votes: votes || "",
-          timestamp: timestamp || new Date().toLocaleString("he-IL")
-        }),
-        signal: controller.signal
-      })
-      .catch((sheetErr) => console.error("Error forwarding to Google Sheets:", sheetErr))
-      .finally(() => clearTimeout(timeoutId));
+      const forwardSheetPromise = (async () => {
+        try {
+          const res = await fetch(GOOGLE_SHEETS_SURVEY_WEBHOOK, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: type || "vote",
+              name,
+              phone,
+              email: email || "",
+              votes: votes || "",
+              timestamp: timestamp || new Date().toLocaleString("he-IL")
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+          return res.ok;
+        } catch (sheetErr) {
+          console.error("Error forwarding to Google Sheets:", sheetErr);
+          return false;
+        }
+      })();
+
+      // Await both promises so the serverless function does not exit/freeze before completion
+      await Promise.all([saveDbPromise, forwardSheetPromise]);
 
       return new Response(JSON.stringify({ status: "success" }), {
         status: 200,
