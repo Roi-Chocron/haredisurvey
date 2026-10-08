@@ -9,6 +9,16 @@ export default async (req) => {
 
   // GET: Return signatures count and recent visible names (or export all for admin/sync)
   if (method === "GET") {
+    // Cleanup test record if requested
+    if (url.searchParams.get("cleanup") === "test_record") {
+      try {
+        const db = getDatabase();
+        await db.sql`DELETE FROM amana_signatures WHERE email = 'sarah.auto.test@example.com'`;
+        return new Response(JSON.stringify({ status: "cleaned" }), { status: 200 });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+      }
+    }
     // Admin / Inspection: export all signatures
     if (url.searchParams.get("export") === "1" || url.searchParams.get("export") === "all") {
       try {
