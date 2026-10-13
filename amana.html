@@ -868,6 +868,249 @@ body {
   }
 }
 
+/* TOP SIGNATURE SECTION & SECTION SELECTION STYLES */
+.top-signature-section {
+  background: #152238;
+  padding: 44px 20px 48px;
+  border-bottom: 3px solid #c9a84c;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.top-sign-inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.top-sign-heading {
+  font-family: 'Frank Ruhl Libre', serif;
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+.top-sign-rule {
+  width: 50px;
+  height: 3px;
+  background: #c9a84c;
+  margin: 0 auto 16px;
+}
+.top-sign-sub {
+  font-size: 15.5px;
+  color: #d8e2f0;
+  line-height: 1.65;
+  margin-bottom: 22px;
+}
+
+/* SECTION SELECTION SUMMARY BAR */
+.sections-selection-summary-box {
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.45);
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  text-align: right;
+  transition: all 0.3s ease;
+}
+.sections-selection-summary-box.selection-pulse {
+  animation: pulse-glow 0.4s ease;
+}
+@keyframes pulse-glow {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(201,168,76,0); }
+  50% { transform: scale(1.02); box-shadow: 0 0 16px rgba(201,168,76,0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(201,168,76,0); }
+}
+.selection-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  color: #f7e7be;
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+.selection-status-icon {
+  width: 22px;
+  height: 22px;
+  background: #c9a84c;
+  color: #111a2e;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.selection-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-select-all-fast {
+  background: #c9a84c;
+  color: #111a2e;
+  border: none;
+  font-family: 'Heebo', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.btn-select-all-fast:hover {
+  background: #e0be60;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+}
+.btn-customize-sections {
+  color: #d8e2f0;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  font-family: 'Heebo', sans-serif;
+  transition: color 0.15s;
+}
+.btn-customize-sections:hover {
+  color: #ffffff;
+}
+
+/* SECTION CONTROLS STRIP BUTTONS */
+.section-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-ctrl-gold {
+  background: #c9a84c !important;
+  color: #111a2e !important;
+  font-weight: 800 !important;
+  border: 1px solid #c9a84c !important;
+}
+.btn-ctrl-gold:hover {
+  background: #deb859 !important;
+}
+.btn-ctrl-muted {
+  background: rgba(255,255,255,0.08) !important;
+  color: #c0d0e8 !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+}
+.btn-ctrl-muted:hover {
+  background: rgba(255,255,255,0.15) !important;
+  color: #ffffff !important;
+}
+
+/* CHAPTER CARDS SELECTION STYLES */
+.topic-select-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(201, 168, 76, 0.5);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  font-family: 'Heebo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-right: auto;
+}
+.topic-select-badge:hover {
+  background: rgba(201, 168, 76, 0.25);
+  border-color: #c9a84c;
+}
+.topic-select-badge input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #c9a84c;
+  cursor: pointer;
+  margin: 0;
+}
+.topic-select-badge.is-active {
+  background: rgba(201, 168, 76, 0.24);
+  border-color: #c9a84c;
+  color: #f7e7be;
+}
+.topic-select-badge.is-partial {
+  background: rgba(230, 160, 40, 0.24);
+  border-color: #e6a028;
+  color: #ffe6a0;
+}
+.topic-select-badge.is-inactive {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #a0b0cc;
+}
+
+.charter-topic-card.topic-unsupported {
+  opacity: 0.65;
+  border: 1px dashed #b0bccd;
+  background: #fbfbfb;
+}
+.charter-topic-card.topic-unsupported:hover {
+  opacity: 0.9;
+}
+.charter-topic-card.topic-supported {
+  border-color: rgba(201, 168, 76, 0.45);
+}
+
+/* BULLET ITEM CHECKBOXES */
+.bullets-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.bullet-item {
+  margin-bottom: 8px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+.bullet-select-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 7px 10px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+.bullet-select-label:hover {
+  background: rgba(201, 168, 76, 0.08);
+}
+.bullet-select-cb {
+  width: 17px;
+  height: 17px;
+  accent-color: #c9a84c;
+  cursor: pointer;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+.bullet-text {
+  flex: 1;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #2c3e50;
+  transition: all 0.15s ease;
+}
+.bullet-item.is-unselected .bullet-text {
+  color: #8898aa;
+  text-decoration: line-through rgba(139, 0, 0, 0.45);
+}
+
 /* RESPONSIVE */
 @media (max-width: 640px) {
   .hero-eyebrow { font-size: 32px; }
@@ -949,7 +1192,7 @@ body {
     </div>
 
     <div class="hero-cta-wrap" style="margin-top: 18px;">
-      <a href="#sign-section" class="btn-primary">
+      <a href="#top-sign-section" class="btn-primary">
         <span>לחתימה על האמנה</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 5 5 12 12 19"></polyline></svg>
       </a>
@@ -961,11 +1204,63 @@ body {
   </div>
 </header>
 
+<!-- TOP SIGNATURE SECTION (BEFORE CHARTER DETAILS) -->
+<section class="top-signature-section" id="top-sign-section">
+  <div class="top-sign-inner">
+    <h2 class="top-sign-heading">חתימה על אמנת הנשים החרדיות</h2>
+    <div class="top-sign-rule"></div>
+    <p class="top-sign-sub">
+      ברירת המחדל היא תמיכה באמנה כולה. ניתן לחתום מיד, או לגלול מטה לבחירה וסימון פרטני של סעיפים ופרקים מועדפים.
+    </p>
+
+    <!-- SECTION SELECTION SUMMARY & FAST SELECT ALL -->
+    <div class="sections-selection-summary-box" id="top-selection-summary-box">
+      <div class="selection-status-row">
+        <span class="selection-status-icon">✓</span>
+        <span id="top-selection-status-text">נבחרו <strong>כל 11 הפרקים</strong> (100 סעיפים) לחתימה</span>
+      </div>
+      <div class="selection-actions-row">
+        <button type="button" class="btn-select-all-fast" onclick="selectAllSections(true)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>לסמן את כולם בלחיצה אחת</span>
+        </button>
+        <a href="#charter-list" class="btn-customize-sections">לבחירה וסינון פרטני של סעיפים מטה ↓</a>
+      </div>
+    </div>
+
+    <!-- TOP SIGNATURE FORM -->
+    <div class="sign-form-container">
+      <div id="top-sign-form-inner">
+        <div class="sign-form-fields">
+          <input type="text" id="top-s-name" placeholder="שם מלא *" autocomplete="name" required />
+          <input type="email" id="top-s-email" placeholder="כתובת אימייל *" autocomplete="email" required />
+        </div>
+        <div class="sign-form-checkbox">
+          <input type="checkbox" id="top-s-hide-name" />
+          <label for="top-s-hide-name">לא להציג את החתימה שלי באתר (חתימה אנונימית)</label>
+        </div>
+        <button type="button" class="sign-submit-btn" id="top-sign-submit-btn" onclick="submitSignature('top')">
+          <span>לחתימה על האמנה</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 5 5 12 12 19"></polyline></svg>
+        </button>
+        <div class="sign-form-error" id="top-s-error">יש למלא שם מלא וכתובת אימייל תקינה</div>
+      </div>
+      <div class="sign-form-success" id="top-s-success" style="display:none;">
+        ✓ חתימתך התקבלה בהצלחה ותתווסף לכלל חותמי האמנה! תודה על תמיכתך.
+      </div>
+    </div>
+
+    <div class="signature-notice-sm">החתימה מאובטחת. הפרטים לא יועברו לשום גורם שלישי.</div>
+  </div>
+</section>
+
 <!-- SECTION CONTROLS STRIP -->
 <div class="section-strip">
   <div class="section-strip-inner">
     <div class="section-title">פירוט פרקי האמנה</div>
     <div class="section-controls">
+      <button type="button" class="btn-ctrl-gold" onclick="selectAllSections(true)">✓ לסמן את כולם בלחיצה אחת</button>
+      <button type="button" class="btn-ctrl-muted" onclick="selectAllSections(false)">✕ בטל סימון הכל</button>
       <button type="button" onclick="expandAllTopics()">הרחבת כל הסעיפים</button>
       <button type="button" onclick="collapseAllTopics()">כיווץ הכל</button>
     </div>
@@ -976,9 +1271,13 @@ body {
 <main class="charter-container" id="charter-list">
 
     <article class="charter-topic-card" id="topic-1">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="1">
         <span class="topic-number">פרק 1</span>
         <h2 class="topic-title">חינוך</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-1" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-1" checked onchange="toggleTopicSelection(1, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שלכל ילד וילדה בחברה החרדית יהיה חינוך איכותי, נפעל לחיוב הרשויות להקים מוסדות ממ"ח לפי ביקוש ההורים, ללא תלות בהחלטת ראש הרשות או בשיקולים פוליטיים, ולהכשרה ולתקצוב של מלמדים בכל סוגי המוסדות. נפעל לשיפור שכר המורים ומעמדם תוך העלאת דרישות הסף. נפעל להעניק מענה רגשי-פסיכולוגי בכל מוסד ולאכיפה על נוכחות מנתחי התנהגות במוסדות כחוק. וכן, מענים ייעודיים לילדות מחוננות ולילדים ולנערות במצוקה סמויה. נרחיב את תכני הלימוד באזרחות, חשיבה ביקורתית, STEM, חינוך פיננסי, מוגנות ברשת, תזונה ובטיחות בדרכים, ונחזק את הלימוד התורני לבנות, את החינוך הבלתי פורמלי ואת תנועות הנוער. נרחיב את ההכשרה המקצועית וההשכלה הגבוהה, לרבות בתי ספר מקצועיים, מסלולי עתודה, ופריסת לימודים מותאמת לאימהות ועובדות, וליווי אישי על ידי האוניברסיטה.</p>
@@ -997,9 +1296,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-2">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="2">
         <span class="topic-number">פרק 2</span>
         <h2 class="topic-title">בריאות האישה</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-2" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-2" checked onchange="toggleTopicSelection(2, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שכל אישה חרדית תזכה לבריאות גופנית ונפשית ולגישה שוויונית לשירותי בריאות מותאמים, נפעל לקידום קמפיינים ממוקדי מגזר מגיל התיכון (בדגש על BRCA, אנדומטריוזיס ורפואה מונעת), להנגשת מידע מסודר ובדיקות סקר מסובסדות בריכוזים נשיים ובמקוואות טהרה, ולהפעלת ניידות לבדיקות מוקדמות לגילוי סרטן השד וצוואר הרחם. כדי למנוע דיכאון לאחר לידה, נפעל להקמת מערך סיוע לנשים סביב הריון ולידה, ולקידום שיח זוגי ומשפחתי. נדאג להפעלת מערך חובשות וכוננות חרדיות ואמבולנסים ייעודיים לנשים במצבי חירום רפואיים ולידה. נדאג לנירמול הפנייה למרפאות בריאות הנפש, ליצירת מעטפת קהילתית תומכת, להבטחת טיפול רגשי מוסמך נטול שרלטנות, ולאכיפת קודי אתיקה ושלילת רישיונות למטפלים מפרי חוק. תמיכה בהליכי שימור פוריות לרווקות בגילאי 30 ומעלה.</p>
@@ -1018,9 +1321,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-3">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="3">
         <span class="topic-number">פרק 3</span>
         <h2 class="topic-title">מוגנות ומניעת אלימות מינית</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-3" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-3" checked onchange="toggleTopicSelection(3, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שכל ילד וכל אישה בחברה החרדית יהיו מוגנים מפני פגיעה ואלימות, נפעל להוראת חינוך מיני ותקשורת בריאה מגיל הגן, שיעורי "אני וגופי" והכנה להתפתחות הורמונלית בהתאמה תרבותית, להכשרת חובה לצוותי הוראה, לפיקוח ואכיפה של כללי מוגנות בחיידרים; איסור שיחות פוגעניות וכללי מרחק בטוח, ובסמינרים; קודי אתיקה ליחסים תקינים. כדי ששמירה על צניעות לא תבוא על חשבון האוטונומיה של נשים ונערות על גופן, נפעל להטמעת עקרון המוגנות בתקנוני המוסדות ובענייני טהרת המשפחה. נפעל לחובת פרסום זכויות הטובלת במקווה. כדי שכל אישה שנפגעה תוכל לקבל סיוע בלי שמידע אישי יגיע לקהילה או למשפחה, נפעל להבטחת מענה דיסקרטי לאלימות ולפגיעה כלכלית, להקמת מקלט הוליסטי לשיקום, ולהכשרת שופטים, דיינים ושוטרים לשיח רגיש וזיהוי פוסט-טראומה.</p>
@@ -1039,9 +1346,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-4">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="4">
         <span class="topic-number">פרק 4</span>
         <h2 class="topic-title">נשים בהליכי גירושין</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-4" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-4" checked onchange="toggleTopicSelection(4, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שנשים חרדיות יזכו להליך הוגן, מכבד ושוויוני בבתי הדין הרבניים, נפעל לכך שסוגיות נלוות לגירושין ייכרכו רק בהסכמת שני הצדדים, שאלימות רוחנית תוכר באופן רשמי בהליכי גירושין, ושדיינים יעברו הכשרה מקצועית חובה על ידי אנשי טיפול מומחים לאלמ"ב. כדי למנוע סרבנות גט והפסדים כספיים, נפעל לקידום הסכמי טרום-נישואין הלכתיים ושילוב פסקי דין לחיוב בגט ופיצויים, לצד שילוב נציגות ציבור בהרכבי בתי הדין. כדי להתאים את הפסיקה למציאות הכלכלית בחברת הלומדים, נפעל לתיקון חוק איזון משאבים. כמו כן, נפעל לסיוע לחד-הוריות במימון שמרטפות, סיוע מותאם בהוצאה לפועל למסלול מזונות, והסברת תהליכי הפרידה בחברה החרדית לגורמי החוק והרשויות.</p>
@@ -1060,9 +1371,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-5">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="5">
         <span class="topic-number">פרק 5</span>
         <h2 class="topic-title">כלכלה ותעסוקה</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-5" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-5" checked onchange="toggleTopicSelection(5, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שלנשים חרדיות יהיו ביטחון כלכלי, שכר הוגן והזדמנויות קידום אמיתיות, מעבר לעצם ההשתלבות בתעסוקה, נפעל להצבת יעדי שכר ממוצע גבוה ואחוז נשים מוגדר במשרות ניהול בכירות, ולקדום גישת איזון בית-עבודה. כדי להגן על עובדות מפני אפליה וניצול, נפעל לאכיפת חוקי הגנת העובד, פיקוח על שכר והטלת סנקציות חמורות על תקציבי עמותות וחממות המנצלות עובדות, ואיסור פלילי על החתמה על חוזים בלתי חוקיים. נפעל לשיפור מעמדן ושכרן של בלניות וגננות ולהרחבת ההכשרה וההעסקה של משגיחות כשרות. כדי לחזק את העצמאות הכלכלית של נשים, נפעל לפיתוח מרחבי הכשרה ויזמות לעצמאיות, להנגשת ידע לזיהוי הונאות ופירמידות, ולסילוק חסמי ייבוא על חומרי גלם (כמו שיער לפאות) להורדת יוקר המחיה.</p>
@@ -1081,9 +1396,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-6">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="6">
         <span class="topic-number">פרק 6</span>
         <h2 class="topic-title">ייצוג במוקדי הכוח</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-6" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-6" checked onchange="toggleTopicSelection(6, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שלנשים חרדיות יהיה ייצוג הולם במוקדי קבלת ההחלטות, נפעל לקביעת חובת ייצוג מינימלי של 20% מכל מגדר בכל חמישייה ברשימות לכנסת, ותוספת מימון למפלגות שיציגו רשימות 50/50 בשלוש העשיריות הראשונות. כדי שנשים חרדיות ישפיעו גם ברמה המקומית, נפעל לקידום כניסתן למועצות ולעיריות בערים חרדיות באמצעות הכשרה, הקמת פורומי נשים בכל שכונה ועיר ויצירת קשר ישיר עם מקבלי החלטות ללא תלות בעסקנים. נפעל להבטחת חוות דעת נשית קבועה בדיוני מדיניות וקבלת החלטות.</p>
@@ -1102,9 +1421,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-7">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="7">
         <span class="topic-number">פרק 7</span>
         <h2 class="topic-title">רווחה</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-7" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-7" checked onchange="toggleTopicSelection(7, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שתהיה מערכת רווחה מקצועית, הנגישה לכל אישה ומשפחה בחברה החרדית, נפעל לשינוי מדיניות ה"התאמה התרבותית" המתווכת דרך עסקנים, לטובת גישה ישירה ועצמאית של הפרט לשירותים חיוניים (כדוגמת הקמת מרכזי מיצוי זכויות ממשלתיים). נפעל להכשרת עובדי הרווחה ועו”סיות לסדרי דין לרגישות תרבותית כלפי הפרט, ולפיקוח הדוק על מחלקות הרווחה ברשויות חרדיות למניעת הטיות דיווח. כדי שהרווחה תחזק את הפרט, נפעל למעבר ממודל של צדקה למודל המעצים את כוחות הפרט - חכות ולא דגים. כמו כן, נפעל לתיאום בין קופות צדקה שכונתיות ולשכות רווחה למניעת כפל תמיכות וקונפליקטים, וניתן תמיכה משמעותית לנשות משרתים חרדיים.</p>
@@ -1123,9 +1446,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-8">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="8">
         <span class="topic-number">פרק 8</span>
         <h2 class="topic-title">קהילה</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-8" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-8" checked onchange="toggleTopicSelection(8, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">נפעל לשילוב ושותפות של נשים בהליכי תכנון ובנייה עירונית, לזיהוי צורכי ילדים, בטיחות ונגישות, לשיפור התחבורה הציבורית כך שתהיה נוחה ובטוחה למשתמשות העיקריות בה, ולהפסקת הזנחת המרחב הציבורי והיגיינת גני הילדים בריכוזים חרדיים. כדי שלנשים חרדיות יהיה מקום שווה ומכבד בחיי הקהילה, נפעל לחובת שותפות נשים בתכנון בתי כנסת ציבוריים, למינוי גבאיות שישמשו כתובת לנשים, ולהדק את הפיקוח והרגולציה על בלניות, מקוואות, בריתות ומוהלים. בנוסף, נפעל לטיפול בתופעת הילדים המסתובבים לבדם בכבישים, לקידום בטיחות בדרכים במוסדות החינוך, ולעידוד הנפקת רישיונות נהיגה בקרב נשים חרדיות.</p>
@@ -1144,9 +1471,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-9">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="9">
         <span class="topic-number">פרק 9</span>
         <h2 class="topic-title">תרבות ופנאי</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-9" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-9" checked onchange="toggleTopicSelection(9, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">כדי שתהיה חלוקה הוגנת של המשאבים הציבוריים, נפעל לחובת שוויון ומעקב ופיקוח אחר חלוקת תקציבי פנאי ותרבות בכל גוף רשמי וברשויות מקומיות, והשוואת ההקצאות לאירועי נשים מול גברים. נפעל לגיוון שעות ההפרדה בחופי הרחצה הנפרדים, ולשיפור נראותם וניקיונם. נקדם את "מודל 3 האזורים" ליצירת מרחבי תרבות ובילוי משפחתיים לצד מרחבים נפרדים מותאמים, ונבטיח פעילויות לילדים חרדים ללא הפרדה כפויה.</p>
@@ -1165,9 +1496,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-10">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="10">
         <span class="topic-number">פרק 10</span>
         <h2 class="topic-title">הדרת נשים</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-10" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-10" checked onchange="toggleTopicSelection(10, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">על מנת למנוע אפליה והדרה של נשים חרדיות במרחב הציבורי ולהנכיח את קיומן, נפעל לקידום חוק לאיסור אפלייה והדרת נשים בעיתונות, בכתבות, בפרסומים ובתמונות. נפעל להגברת אכיפה משמעותית נגד הפרדה כפויה באוטובוסים והטרדות על רקע ישיבת נשים בקדמת האוטובוס, ולקידום קריאת רחובות בשכונות חרדיות על שם מנהיגות, נשות ציבור ורבניות חרדיות.</p>
@@ -1186,9 +1521,13 @@ body {
     </article>
 
     <article class="charter-topic-card" id="topic-11">
-      <div class="topic-header">
+      <div class="topic-header" data-topic-id="11">
         <span class="topic-number">פרק 11</span>
         <h2 class="topic-title">התנדבות בקהילה</h2>
+        <label class="topic-select-badge is-active" id="topic-badge-11" onclick="event.stopPropagation()">
+          <input type="checkbox" id="topic-cb-11" checked onchange="toggleTopicSelection(11, this.checked)" />
+          <span class="topic-cb-text">תומכת בפרק זה</span>
+        </label>
       </div>
       <div class="topic-body">
         <p class="topic-summary">נפעל להקמת מסגרת שירות אזרחי התנדבותית מותאמת לציבור החרדי לבנות המעוניינות בכך.</p>
@@ -1226,6 +1565,21 @@ body {
 
     <!-- INLINE SIGNATURE FORM -->
     <div class="sign-form-container">
+      <!-- SECTION SELECTION SUMMARY & FAST SELECT ALL -->
+      <div class="sections-selection-summary-box" id="bottom-selection-summary-box">
+        <div class="selection-status-row">
+          <span class="selection-status-icon">✓</span>
+          <span id="selection-status-text">נבחרו <strong>כל 11 הפרקים</strong> (100 סעיפים) לחתימה</span>
+        </div>
+        <div class="selection-actions-row">
+          <button type="button" class="btn-select-all-fast" onclick="selectAllSections(true)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>לסמן את כולם בלחיצה אחת</span>
+          </button>
+          <a href="#charter-list" class="btn-customize-sections">לצפייה ושינוי בחירת הסעיפים מעלה ↑</a>
+        </div>
+      </div>
+
       <div id="sign-form-inner">
         <div class="sign-form-fields">
           <input type="text" id="s-name" placeholder="שם מלא *" autocomplete="name" required />
@@ -1235,7 +1589,7 @@ body {
           <input type="checkbox" id="s-hide-name" />
           <label for="s-hide-name">לא להציג את החתימה שלי באתר (חתימה אנונימית)</label>
         </div>
-        <button type="button" class="sign-submit-btn" onclick="submitSignature()">
+        <button type="button" class="sign-submit-btn" id="bottom-sign-submit-btn" onclick="submitSignature('bottom')">
           <span>לחתימה על האמנה</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 5 5 12 12 19"></polyline></svg>
         </button>
@@ -1483,14 +1837,273 @@ function updateCounterDisplay(count) {
   if (heroNumEl) heroNumEl.textContent = formatted;
 }
 
-function submitSignature() {
-  const nameInput = document.getElementById('s-name');
-  const emailInput = document.getElementById('s-email');
-  const hideNameInput = document.getElementById('s-hide-name');
-  const errorEl = document.getElementById('s-error');
-  const successEl = document.getElementById('s-success');
-  const formInner = document.getElementById('sign-form-inner');
-  const submitBtn = document.querySelector('.sign-submit-btn');
+// --- SECTION SELECTION & GRANULAR CHOICE LOGIC ---
+
+function initBulletCheckboxes() {
+  document.querySelectorAll('.charter-topic-card').forEach(card => {
+    const topicId = card.id.replace('topic-', '');
+    const bullets = card.querySelectorAll('.bullets-list li');
+    bullets.forEach((li, idx) => {
+      li.classList.add('bullet-item');
+      const text = li.innerHTML;
+      li.innerHTML = `
+        <label class="bullet-select-label">
+          <input type="checkbox" class="bullet-select-cb" checked data-topic="${topicId}" data-index="${idx+1}" onchange="onBulletChange('${topicId}')" />
+          <span class="bullet-text">${text}</span>
+        </label>
+      `;
+    });
+  });
+  updateSelectionState();
+}
+
+function toggleTopicSelection(topicId, isChecked) {
+  const card = document.getElementById(`topic-${topicId}`);
+  if (!card) return;
+  const checkboxes = card.querySelectorAll('.bullet-select-cb');
+  checkboxes.forEach(cb => {
+    cb.checked = isChecked;
+    const li = cb.closest('li.bullet-item');
+    if (li) {
+      if (isChecked) {
+        li.classList.remove('is-unselected');
+      } else {
+        li.classList.add('is-unselected');
+      }
+    }
+  });
+
+  const badge = document.getElementById(`topic-badge-${topicId}`);
+  const topicCb = document.getElementById(`topic-cb-${topicId}`);
+  if (topicCb) {
+    topicCb.checked = isChecked;
+    topicCb.indeterminate = false;
+  }
+  if (badge) {
+    badge.classList.remove('is-active', 'is-inactive', 'is-partial');
+    if (isChecked) {
+      badge.classList.add('is-active');
+      const textSpan = badge.querySelector('.topic-cb-text');
+      if (textSpan) textSpan.textContent = 'תומכת בפרק זה';
+    } else {
+      badge.classList.add('is-inactive');
+      const textSpan = badge.querySelector('.topic-cb-text');
+      if (textSpan) textSpan.textContent = 'לא נבחר';
+    }
+  }
+
+  if (isChecked) {
+    card.classList.add('topic-supported');
+    card.classList.remove('topic-unsupported');
+  } else {
+    card.classList.add('topic-unsupported');
+    card.classList.remove('topic-supported');
+  }
+
+  updateSelectionState();
+}
+
+function onBulletChange(topicId) {
+  const card = document.getElementById(`topic-${topicId}`);
+  if (!card) return;
+  const checkboxes = card.querySelectorAll('.bullet-select-cb');
+  let checkedCount = 0;
+  checkboxes.forEach(cb => {
+    const li = cb.closest('li.bullet-item');
+    if (cb.checked) {
+      checkedCount++;
+      if (li) li.classList.remove('is-unselected');
+    } else {
+      if (li) li.classList.add('is-unselected');
+    }
+  });
+
+  const total = checkboxes.length;
+  const badge = document.getElementById(`topic-badge-${topicId}`);
+  const topicCb = document.getElementById(`topic-cb-${topicId}`);
+
+  if (badge) badge.classList.remove('is-active', 'is-inactive', 'is-partial');
+
+  if (checkedCount === total) {
+    if (topicCb) { topicCb.checked = true; topicCb.indeterminate = false; }
+    if (badge) {
+      badge.classList.add('is-active');
+      const textSpan = badge.querySelector('.topic-cb-text');
+      if (textSpan) textSpan.textContent = 'תומכת בפרק זה';
+    }
+    card.classList.remove('topic-unsupported');
+    card.classList.add('topic-supported');
+  } else if (checkedCount === 0) {
+    if (topicCb) { topicCb.checked = false; topicCb.indeterminate = false; }
+    if (badge) {
+      badge.classList.add('is-inactive');
+      const textSpan = badge.querySelector('.topic-cb-text');
+      if (textSpan) textSpan.textContent = 'לא נבחר';
+    }
+    card.classList.add('topic-unsupported');
+    card.classList.remove('topic-supported');
+  } else {
+    if (topicCb) { topicCb.checked = false; topicCb.indeterminate = true; }
+    if (badge) {
+      badge.classList.add('is-partial');
+      const textSpan = badge.querySelector('.topic-cb-text');
+      if (textSpan) textSpan.textContent = `תמיכה חלקית (${checkedCount}/${total})`;
+    }
+    card.classList.remove('topic-unsupported');
+    card.classList.add('topic-supported');
+  }
+
+  updateSelectionState();
+}
+
+function selectAllSections(selectAll) {
+  document.querySelectorAll('.charter-topic-card').forEach(card => {
+    const topicId = card.id.replace('topic-', '');
+    const topicCb = document.getElementById(`topic-cb-${topicId}`);
+    if (topicCb) {
+      topicCb.checked = selectAll;
+      topicCb.indeterminate = false;
+    }
+    const badge = document.getElementById(`topic-badge-${topicId}`);
+    if (badge) {
+      badge.classList.remove('is-active', 'is-inactive', 'is-partial');
+      badge.classList.add(selectAll ? 'is-active' : 'is-inactive');
+      const textSpan = badge.querySelector('.topic-cb-text');
+      if (textSpan) textSpan.textContent = selectAll ? 'תומכת בפרק זה' : 'לא נבחר';
+    }
+
+    if (selectAll) {
+      card.classList.remove('topic-unsupported');
+      card.classList.add('topic-supported');
+    } else {
+      card.classList.add('topic-unsupported');
+      card.classList.remove('topic-supported');
+    }
+
+    const checkboxes = card.querySelectorAll('.bullet-select-cb');
+    checkboxes.forEach(cb => {
+      cb.checked = selectAll;
+      const li = cb.closest('li.bullet-item');
+      if (li) {
+        if (selectAll) li.classList.remove('is-unselected');
+        else li.classList.add('is-unselected');
+      }
+    });
+  });
+
+  updateSelectionState();
+
+  // Add subtle pulse effect to indicate change
+  const topBox = document.getElementById('top-selection-summary-box');
+  const btmBox = document.getElementById('bottom-selection-summary-box');
+  [topBox, btmBox].forEach(b => {
+    if (b) {
+      b.classList.remove('selection-pulse');
+      void b.offsetWidth; // trigger reflow
+      b.classList.add('selection-pulse');
+    }
+  });
+}
+
+function getSelectionSummary() {
+  const cards = document.querySelectorAll('.charter-topic-card');
+  let totalBullets = 0;
+  let selectedBullets = 0;
+  const topicDetails = [];
+  const selectedTopics = [];
+
+  cards.forEach(card => {
+    const topicId = card.id.replace('topic-', '');
+    const titleEl = card.querySelector('.topic-title');
+    const title = titleEl ? titleEl.textContent.trim() : `פרק ${topicId}`;
+    const allCb = card.querySelectorAll('.bullet-select-cb');
+    const checkedCb = card.querySelectorAll('.bullet-select-cb:checked');
+    const total = allCb.length;
+    const checked = checkedCb.length;
+
+    totalBullets += total;
+    selectedBullets += checked;
+
+    if (checked > 0) {
+      selectedTopics.push(title);
+      if (checked === total) {
+        topicDetails.push(`${title} (מלא - ${checked}/${total})`);
+      } else {
+        topicDetails.push(`${title} (חלקי - ${checked}/${total})`);
+      }
+    }
+  });
+
+  const isFullCharter = (selectedBullets === totalBullets && totalBullets > 0);
+  let summaryText = "";
+  if (isFullCharter) {
+    summaryText = `כל סעיפי האמנה (100/100 סעיפים, כל 11 הפרקים)`;
+  } else if (selectedBullets > 0) {
+    summaryText = `חתימה על ${selectedBullets} מתוך ${totalBullets} סעיפים (${selectedTopics.length} פרקים): ${topicDetails.join('; ')}`;
+  } else {
+    summaryText = `לא נבחרו סעיפים`;
+  }
+
+  return {
+    totalBullets,
+    selectedBullets,
+    activeTopicsCount: selectedTopics.length,
+    selectedTopics,
+    summaryText,
+    isFullCharter
+  };
+}
+
+function updateSelectionState() {
+  const summary = getSelectionSummary();
+  const topStatusEl = document.getElementById('top-selection-status-text');
+  const btmStatusEl = document.getElementById('selection-status-text');
+
+  let htmlContent = '';
+  if (summary.isFullCharter) {
+    htmlContent = `נבחרו <strong>כל 11 הפרקים</strong> (${summary.totalBullets} סעיפים) לחתימה`;
+  } else if (summary.selectedBullets > 0) {
+    htmlContent = `נבחרו <strong>${summary.selectedBullets} מתוך ${summary.totalBullets} סעיפים</strong> (${summary.activeTopicsCount} פרקים) לחתימה`;
+  } else {
+    htmlContent = `<span style="color:#ffb3b3;">⚠️ לא סומנו סעיפים. יש לבחור לפחות סעיף אחד באמנה כדי לחתום.</span>`;
+  }
+
+  if (topStatusEl) topStatusEl.innerHTML = htmlContent;
+  if (btmStatusEl) btmStatusEl.innerHTML = htmlContent;
+}
+
+// Live form synchronization between top and bottom boxes
+function setupFormSync() {
+  const topName = document.getElementById('top-s-name');
+  const btmName = document.getElementById('s-name');
+  const topEmail = document.getElementById('top-s-email');
+  const btmEmail = document.getElementById('s-email');
+  const topHide = document.getElementById('top-s-hide-name');
+  const btmHide = document.getElementById('s-hide-name');
+
+  if (topName && btmName) {
+    topName.addEventListener('input', () => { btmName.value = topName.value; });
+    btmName.addEventListener('input', () => { topName.value = btmName.value; });
+  }
+  if (topEmail && btmEmail) {
+    topEmail.addEventListener('input', () => { btmEmail.value = topEmail.value; });
+    btmEmail.addEventListener('input', () => { topEmail.value = btmEmail.value; });
+  }
+  if (topHide && btmHide) {
+    topHide.addEventListener('change', () => { btmHide.checked = topHide.checked; });
+    btmHide.addEventListener('change', () => { topHide.checked = btmHide.checked; });
+  }
+}
+
+function submitSignature(source = 'bottom') {
+  const isTop = (source === 'top');
+  const nameInput = document.getElementById(isTop ? 'top-s-name' : 's-name') || document.getElementById('s-name');
+  const emailInput = document.getElementById(isTop ? 'top-s-email' : 's-email') || document.getElementById('s-email');
+  const hideNameInput = document.getElementById(isTop ? 'top-s-hide-name' : 's-hide-name') || document.getElementById('s-hide-name');
+  
+  const errorEl = document.getElementById(isTop ? 'top-s-error' : 's-error');
+  const otherErrorEl = document.getElementById(isTop ? 's-error' : 'top-s-error');
+  const submitBtn = document.getElementById(isTop ? 'top-sign-submit-btn' : 'bottom-sign-submit-btn') || document.querySelector('.sign-submit-btn');
 
   let name = nameInput ? nameInput.value.trim() : '';
   const email = emailInput ? emailInput.value.trim() : '';
@@ -1499,6 +2112,15 @@ function submitSignature() {
   // Auto-correct Avia Revach spelling if entered as רווי
   if (name === 'אביה רווי' || name.includes('רווי')) {
     name = 'אביה רווח';
+  }
+
+  const selection = getSelectionSummary();
+  if (selection.selectedBullets === 0) {
+    if (errorEl) {
+      errorEl.textContent = 'יש לבחור לפחות סעיף אחד באמנה כדי לחתום';
+      errorEl.style.display = 'block';
+    }
+    return;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1511,6 +2133,7 @@ function submitSignature() {
   }
 
   if (errorEl) errorEl.style.display = 'none';
+  if (otherErrorEl) otherErrorEl.style.display = 'none';
 
   // Disable button during send
   if (submitBtn) {
@@ -1524,10 +2147,12 @@ function submitSignature() {
     name: name,
     email: email,
     hideName: hideName,
+    selectedSectionsSummary: selection.summaryText,
+    selectedTopics: selection.selectedTopics,
+    isFullCharter: selection.isFullCharter,
     timestamp: new Date().toISOString()
   };
 
-  // Send to Netlify API
   fetch(AMANA_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1543,7 +2168,6 @@ function submitSignature() {
     updateCounterDisplay(currentSignaturesCount);
 
     if (!hideName) {
-      // Add immediately to the beginning of the list
       allSignaturesList.unshift(name);
       const searchInput = document.getElementById('signatures-search-input');
       if (searchInput && searchInput.value.trim()) {
@@ -1551,29 +2175,47 @@ function submitSignature() {
       } else {
         renderSignaturesList(allSignaturesList);
       }
-      
-      // Scroll to top of list container
       const scrollBox = document.getElementById('all-signatures-scroll-container');
       if (scrollBox) scrollBox.scrollTop = 0;
     }
 
-    if (formInner) formInner.style.display = 'none';
-    if (successEl) successEl.style.display = 'block';
+    // Hide both forms & show success banners
+    const topFormInner = document.getElementById('top-sign-form-inner');
+    const btmFormInner = document.getElementById('sign-form-inner');
+    const topSuccessEl = document.getElementById('top-s-success');
+    const btmSuccessEl = document.getElementById('s-success');
+
+    if (topFormInner) topFormInner.style.display = 'none';
+    if (btmFormInner) btmFormInner.style.display = 'none';
+    if (topSuccessEl) topSuccessEl.style.display = 'block';
+    if (btmSuccessEl) btmSuccessEl.style.display = 'block';
   }
 }
 
 // Check if user already signed on load & fetch live count
 document.addEventListener('DOMContentLoaded', () => {
+  initBulletCheckboxes();
+  setupFormSync();
   fetchSignaturesCount();
   setInterval(fetchSignaturesCount, 30000);
 
   if (localStorage.getItem('amana_user_signed')) {
-    const formInner = document.getElementById('sign-form-inner');
-    const successEl = document.getElementById('s-success');
-    if (formInner) formInner.style.display = 'none';
-    if (successEl) {
-      successEl.textContent = '✓ כבר חתמת על אמנת הנשים החרדיות. תודה על תמיכתך!';
-      successEl.style.display = 'block';
+    const topFormInner = document.getElementById('top-sign-form-inner');
+    const btmFormInner = document.getElementById('sign-form-inner');
+    const topSuccessEl = document.getElementById('top-s-success');
+    const btmSuccessEl = document.getElementById('s-success');
+
+    if (topFormInner) topFormInner.style.display = 'none';
+    if (btmFormInner) btmFormInner.style.display = 'none';
+
+    const alreadySignedMsg = '✓ כבר חתמת על אמנת הנשים החרדיות. תודה על תמיכתך!';
+    if (topSuccessEl) {
+      topSuccessEl.textContent = alreadySignedMsg;
+      topSuccessEl.style.display = 'block';
+    }
+    if (btmSuccessEl) {
+      btmSuccessEl.textContent = alreadySignedMsg;
+      btmSuccessEl.style.display = 'block';
     }
   }
 });

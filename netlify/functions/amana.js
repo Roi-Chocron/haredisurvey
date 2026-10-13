@@ -142,7 +142,7 @@ export default async (req) => {
   if (method === "POST") {
     try {
       const body = await req.json();
-      let { name, email, hideName } = body;
+      let { name, email, hideName, selectedSectionsSummary, selectedTopics } = body;
 
       if (!name || !email) {
         return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -174,14 +174,31 @@ export default async (req) => {
         console.error("Duplicate check error:", checkErr);
       }
 
+      const sectionsText = selectedSectionsSummary || (Array.isArray(selectedTopics) ? selectedTopics.join(", ") : "כל סעיפי האמנה");
+
       // 1. Save to Netlify Postgres Database
       const saveDbPromise = (async () => {
         try {
           const db = getDatabase();
-          await db.sql`
-            INSERT INTO amana_signatures (name, email, hide_name)
-            VALUES (${name}, ${email}, ${Boolean(hideName)})
-          `;
+          try {
+            await db.sql`
+              INSERT INTO amana_signatures (name, email, hide_name, selected_sections)
+              VALUES (${name}, ${email}, ${Boolean(hideName)}, ${sectionsText})
+            `;
+          } catch (colErr) {
+            try {
+              await db.sql`ALTER TABLE amana_signatures ADD COLUMN IF NOT EXISTS selected_sections TEXT`;
+              await db.sql`
+                INSERT INTO amana_signatures (name, email, hide_name, selected_sections)
+                VALUES (${name}, ${email}, ${Boolean(hideName)}, ${sectionsText})
+              `;
+            } catch (fallbackErr) {
+              await db.sql`
+                INSERT INTO amana_signatures (name, email, hide_name)
+                VALUES (${name}, ${email}, ${Boolean(hideName)})
+              `;
+            }
+          }
           return true;
         } catch (dbErr) {
           console.error("Error saving to database:", dbErr);
@@ -200,6 +217,7 @@ export default async (req) => {
               name,
               email,
               hideName: Boolean(hideName),
+              selectedSections: sectionsText,
               timestamp: new Date().toISOString()
             }),
             signal: AbortSignal.timeout(8000)

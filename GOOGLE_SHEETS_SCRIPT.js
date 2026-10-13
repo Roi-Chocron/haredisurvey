@@ -115,15 +115,18 @@ function doPost(e) {
       }
     }
     
+    var selectedSections = (data.selectedSections || data.selected_sections || "כל סעיפי האמנה").toString().trim();
+
     // מציאת השורה הריקה הראשונה בעמודה B (שם מלא)
     var targetRow = findFirstEmptyRow(sheet);
     
-    // כתיבת הנתונים ישירות לשורה הריקה הראשונה
-    sheet.getRange(targetRow, 1, 1, 4).setValues([[
+    // כתיבת הנתונים ישירות לשורה הריקה הראשונה (כולל סעיפים נבחרים בעמודה E)
+    sheet.getRange(targetRow, 1, 1, 5).setValues([[
       timestamp,
       name,
       email,
-      hideName
+      hideName,
+      selectedSections
     ]]);
     
     return ContentService.createTextOutput(JSON.stringify({ 
