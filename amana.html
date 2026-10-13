@@ -923,10 +923,15 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14.5px;
-  color: #f7e7be;
+  font-size: 15px;
+  color: #ffffff;
   margin-bottom: 12px;
   line-height: 1.45;
+  font-weight: 500;
+}
+.selection-status-row strong {
+  color: #fce8a6;
+  font-weight: 800;
 }
 .selection-status-icon {
   width: 22px;
@@ -951,9 +956,9 @@ body {
 .btn-select-all-fast {
   background: #c9a84c;
   color: #111a2e;
-  border: none;
+  border: 1.5px solid #a37f26;
   font-family: 'Heebo', sans-serif;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 800;
   padding: 8px 18px;
   border-radius: 4px;
@@ -962,16 +967,17 @@ body {
   align-items: center;
   gap: 7px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 .btn-select-all-fast:hover {
-  background: #e0be60;
+  background: #deb859;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(201, 168, 76, 0.4);
+  box-shadow: 0 4px 12px rgba(201, 168, 76, 0.45);
 }
 .btn-customize-sections {
-  color: #d8e2f0;
-  font-size: 13px;
+  color: #fce8a6;
+  font-size: 13.5px;
+  font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
   background: none;
@@ -984,7 +990,7 @@ body {
   color: #ffffff;
 }
 
-/* SECTION CONTROLS STRIP BUTTONS */
+/* SECTION CONTROLS STRIP BUTTONS (HIGH CONTRAST ON LIGHT STRIP) */
 .section-controls {
   display: flex;
   align-items: center;
@@ -995,28 +1001,30 @@ body {
   background: #c9a84c !important;
   color: #111a2e !important;
   font-weight: 800 !important;
-  border: 1px solid #c9a84c !important;
+  border: 1.5px solid #a37f26 !important;
 }
 .btn-ctrl-gold:hover {
   background: #deb859 !important;
 }
 .btn-ctrl-muted {
-  background: rgba(255,255,255,0.08) !important;
-  color: #c0d0e8 !important;
-  border: 1px solid rgba(255,255,255,0.2) !important;
+  background: #ffffff !important;
+  color: #1a2744 !important;
+  border: 1.5px solid #94a3b8 !important;
+  font-weight: 700 !important;
 }
 .btn-ctrl-muted:hover {
-  background: rgba(255,255,255,0.15) !important;
-  color: #ffffff !important;
+  background: #f1f5f9 !important;
+  border-color: #64748b !important;
+  color: #0f172a !important;
 }
 
-/* CHAPTER CARDS SELECTION STYLES */
+/* CHAPTER CARDS SELECTION STYLES (HIGH CONTRAST ON WHITE CARDS) */
 .topic-select-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(201, 168, 76, 0.5);
+  background: #ffffff;
+  border: 1.5px solid #b8860b;
   padding: 6px 14px;
   border-radius: 20px;
   cursor: pointer;
@@ -1025,49 +1033,54 @@ body {
   font-family: 'Heebo', sans-serif;
   font-size: 13px;
   font-weight: 700;
-  color: #ffffff;
+  color: #1a2744;
   margin-right: auto;
-}
-.topic-select-badge:hover {
-  background: rgba(201, 168, 76, 0.25);
-  border-color: #c9a84c;
 }
 .topic-select-badge input[type="checkbox"] {
   width: 17px;
   height: 17px;
-  accent-color: #c9a84c;
+  accent-color: #b8860b;
   cursor: pointer;
   margin: 0;
 }
 .topic-select-badge.is-active {
-  background: rgba(201, 168, 76, 0.24);
-  border-color: #c9a84c;
-  color: #f7e7be;
+  background: #fdf8eb;
+  border: 1.5px solid #b8860b;
+  color: #1a2744;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.topic-select-badge.is-active:hover {
+  background: #faefd2;
+  border-color: #8b6508;
 }
 .topic-select-badge.is-partial {
-  background: rgba(230, 160, 40, 0.24);
-  border-color: #e6a028;
-  color: #ffe6a0;
+  background: #fff7ed;
+  border: 1.5px solid #c2410c;
+  color: #9a3412;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 .topic-select-badge.is-inactive {
-  background: rgba(0, 0, 0, 0.35);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #a0b0cc;
+  background: #f1f5f9;
+  border: 1.5px solid #94a3b8;
+  color: #334155;
+}
+.topic-select-badge.is-inactive:hover {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
 .charter-topic-card.topic-unsupported {
-  opacity: 0.65;
-  border: 1px dashed #b0bccd;
-  background: #fbfbfb;
+  border: 1.5px dashed #94a3b8;
+  background: #f8fafc;
 }
 .charter-topic-card.topic-unsupported:hover {
-  opacity: 0.9;
+  border-color: #64748b;
 }
 .charter-topic-card.topic-supported {
-  border-color: rgba(201, 168, 76, 0.45);
+  border-color: rgba(201, 168, 76, 0.55);
 }
 
-/* BULLET ITEM CHECKBOXES */
+/* BULLET ITEM CHECKBOXES & UNSELECTED STYLING (NO STRIKETHROUGH) */
 .bullets-list {
   list-style: none;
   padding: 0;
@@ -1075,17 +1088,18 @@ body {
 }
 .bullet-item {
   margin-bottom: 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.15s ease;
+  border: 1px solid transparent;
 }
 .bullet-select-label {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   cursor: pointer;
-  padding: 7px 10px;
-  border-radius: 4px;
-  transition: background 0.15s ease;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
   user-select: none;
 }
 .bullet-select-label:hover {
@@ -1094,7 +1108,7 @@ body {
 .bullet-select-cb {
   width: 17px;
   height: 17px;
-  accent-color: #c9a84c;
+  accent-color: #b8860b;
   cursor: pointer;
   margin-top: 3px;
   flex-shrink: 0;
@@ -1103,12 +1117,34 @@ body {
   flex: 1;
   font-size: 15px;
   line-height: 1.65;
-  color: #2c3e50;
+  color: #1a2744;
+  font-weight: 500;
   transition: all 0.15s ease;
 }
+.bullet-tag-unselected {
+  display: none;
+  font-size: 11px;
+  font-weight: 800;
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 8px;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+/* UNSELECTED BULLET: NO STRIKETHROUGH! FULLY READABLE WITH CRISP SLATE TEXT */
+.bullet-item.is-unselected {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
 .bullet-item.is-unselected .bullet-text {
-  color: #8898aa;
-  text-decoration: line-through rgba(139, 0, 0, 0.45);
+  color: #334155;
+  text-decoration: none !important;
+}
+.bullet-item.is-unselected .bullet-tag-unselected {
+  display: inline-block !important;
 }
 
 /* RESPONSIVE */
@@ -1849,6 +1885,7 @@ function initBulletCheckboxes() {
       li.innerHTML = `
         <label class="bullet-select-label">
           <input type="checkbox" class="bullet-select-cb" checked data-topic="${topicId}" data-index="${idx+1}" onchange="onBulletChange('${topicId}')" />
+          <span class="bullet-tag-unselected">לא נבחר</span>
           <span class="bullet-text">${text}</span>
         </label>
       `;
@@ -2005,11 +2042,31 @@ function selectAllSections(selectAll) {
   });
 }
 
+function compressNumberRanges(nums) {
+  if (!nums || nums.length === 0) return '';
+  const ranges = [];
+  let start = nums[0];
+  let prev = nums[0];
+
+  for (let i = 1; i < nums.length; i++) {
+    const cur = nums[i];
+    if (cur === prev + 1) {
+      prev = cur;
+    } else {
+      ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+      start = cur;
+      prev = cur;
+    }
+  }
+  ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+  return ranges.join(', ');
+}
+
 function getSelectionSummary() {
   const cards = document.querySelectorAll('.charter-topic-card');
   let totalBullets = 0;
   let selectedBullets = 0;
-  const topicDetails = [];
+  const exactSectionsList = [];
   const selectedTopics = [];
 
   cards.forEach(card => {
@@ -2017,19 +2074,26 @@ function getSelectionSummary() {
     const titleEl = card.querySelector('.topic-title');
     const title = titleEl ? titleEl.textContent.trim() : `פרק ${topicId}`;
     const allCb = card.querySelectorAll('.bullet-select-cb');
-    const checkedCb = card.querySelectorAll('.bullet-select-cb:checked');
     const total = allCb.length;
-    const checked = checkedCb.length;
 
+    const checkedIndexes = [];
+    allCb.forEach((cb, idx) => {
+      if (cb.checked) {
+        checkedIndexes.push(idx + 1);
+      }
+    });
+
+    const checked = checkedIndexes.length;
     totalBullets += total;
     selectedBullets += checked;
 
     if (checked > 0) {
       selectedTopics.push(title);
       if (checked === total) {
-        topicDetails.push(`${title} (מלא - ${checked}/${total})`);
+        exactSectionsList.push(`פרק ${topicId} (1-${total})`);
       } else {
-        topicDetails.push(`${title} (חלקי - ${checked}/${total})`);
+        const rangesStr = compressNumberRanges(checkedIndexes);
+        exactSectionsList.push(`פרק ${topicId} (${rangesStr})`);
       }
     }
   });
@@ -2037,9 +2101,9 @@ function getSelectionSummary() {
   const isFullCharter = (selectedBullets === totalBullets && totalBullets > 0);
   let summaryText = "";
   if (isFullCharter) {
-    summaryText = `כל סעיפי האמנה (100/100 סעיפים, כל 11 הפרקים)`;
+    summaryText = `כל 100 הסעיפים (פרקים 1-11)`;
   } else if (selectedBullets > 0) {
-    summaryText = `חתימה על ${selectedBullets} מתוך ${totalBullets} סעיפים (${selectedTopics.length} פרקים): ${topicDetails.join('; ')}`;
+    summaryText = `${exactSectionsList.join(' | ')} (סה"כ ${selectedBullets} סעיפים)`;
   } else {
     summaryText = `לא נבחרו סעיפים`;
   }
@@ -2049,6 +2113,7 @@ function getSelectionSummary() {
     selectedBullets,
     activeTopicsCount: selectedTopics.length,
     selectedTopics,
+    exactSectionsList,
     summaryText,
     isFullCharter
   };

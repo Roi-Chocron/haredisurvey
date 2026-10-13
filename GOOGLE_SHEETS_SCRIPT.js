@@ -95,8 +95,17 @@ function doPost(e) {
     if (name === "אביה רוווי" || name.indexOf("רווי") !== -1) {
       name = "אביה רווח";
     }
+
+    var selectedSections = (data.selectedSections || data.selected_sections || data.sections || "כל 100 הסעיפים (פרקים 1-11)").toString().trim();
+
+    // וידוא כותרת עמודה E בשורה 1
+    if (sheet.getRange(1, 5).getValue().toString().trim() === "") {
+      sheet.getRange(1, 5).setValue("סעיפים שנבחרו");
+      sheet.getRange(1, 5).setFontWeight("bold");
+    }
     
-    // בדיקת מניעת כפילויות לפי אימייל: אם האימייל כבר קיים בגיליון, לא נוסיף אותו שוב
+    // בדיקת מניעת כפילויות / עדכון חתימה קיימת לפי אימייל:
+    // אם האימייל כבר קיים בגיליון, נעדכן את שורתו עם הסעיפים שנבחרו (כולל עמודה E)
     if (email) {
       var lastRowCheck = sheet.getLastRow();
       if (lastRowCheck > 1) {
@@ -105,17 +114,19 @@ function doPost(e) {
         for (var eIdx = 0; eIdx < emailColValues.length; eIdx++) {
           var existingEmail = (emailColValues[eIdx][0] || "").toString().toLowerCase().trim();
           if (existingEmail && existingEmail === cleanEmail) {
+            var existingRow = eIdx + 2;
+            sheet.getRange(existingRow, 2).setValue(name);
+            sheet.getRange(existingRow, 4).setValue(hideName);
+            sheet.getRange(existingRow, 5).setValue(selectedSections);
             return ContentService.createTextOutput(JSON.stringify({ 
-              status: "already_exists", 
-              message: "חתימה זו כבר קיימת בגיליון",
-              row: eIdx + 2 
+              status: "updated_existing", 
+              message: "חתימה קיימת עודכנה בהצלחה בגיליון",
+              row: existingRow 
             })).setMimeType(ContentService.MimeType.JSON);
           }
         }
       }
     }
-    
-    var selectedSections = (data.selectedSections || data.selected_sections || "כל סעיפי האמנה").toString().trim();
 
     // מציאת השורה הריקה הראשונה בעמודה B (שם מלא)
     var targetRow = findFirstEmptyRow(sheet);

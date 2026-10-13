@@ -55,11 +55,20 @@ export default async (req) => {
     if (url.searchParams.get("export") === "1" || url.searchParams.get("export") === "all") {
       try {
         const db = getDatabase();
-        const allSignatures = await db.sql`
-          SELECT id, name, email, hide_name, created_at 
-          FROM amana_signatures 
-          ORDER BY id ASC
-        `;
+        let allSignatures;
+        try {
+          allSignatures = await db.sql`
+            SELECT id, name, email, hide_name, selected_sections, created_at 
+            FROM amana_signatures 
+            ORDER BY id ASC
+          `;
+        } catch (colErr) {
+          allSignatures = await db.sql`
+            SELECT id, name, email, hide_name, created_at 
+            FROM amana_signatures 
+            ORDER BY id ASC
+          `;
+        }
         return new Response(JSON.stringify({ total: allSignatures.length, signatures: allSignatures }), {
           status: 200,
           headers: { 
@@ -69,6 +78,63 @@ export default async (req) => {
         });
       } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    }
+
+    // Sync all database signatures with selected_sections to Google Sheets
+    if (url.searchParams.get("sync") === "sheets") {
+      try {
+        const db = getDatabase();
+        let rows;
+        try {
+          rows = await db.sql`
+            SELECT id, name, email, hide_name, selected_sections, created_at 
+            FROM amana_signatures 
+            ORDER BY id ASC
+          `;
+        } catch (colErr) {
+          rows = await db.sql`
+            SELECT id, name, email, hide_name, created_at 
+            FROM amana_signatures 
+            ORDER BY id ASC
+          `;
+        }
+
+        let syncedCount = 0;
+        for (let i = 0; i < rows.length; i += 3) {
+          const batch = rows.slice(i, i + 3);
+          await Promise.all(batch.map(async (row) => {
+            try {
+              const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: JSON.stringify({
+                  action: "sign_amana",
+                  name: row.name,
+                  email: row.email,
+                  hideName: Boolean(row.hide_name),
+                  selectedSections: row.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
+                  timestamp: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString()
+                }),
+                signal: AbortSignal.timeout(8000)
+              });
+              if (res.ok) syncedCount++;
+            } catch (err) {}
+          }));
+          if (i + 3 < rows.length) {
+            await new Promise((r) => setTimeout(r, 300));
+          }
+        }
+
+        return new Response(JSON.stringify({ status: "success", syncedCount, total: rows.length }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (syncErr) {
+        return new Response(JSON.stringify({ error: syncErr.message }), {
           status: 500,
           headers: { "Content-Type": "application/json" }
         });
@@ -152,8 +218,9 @@ export default async (req) => {
       }
 
       name = normalizeName(name);
+      const sectionsText = selectedSectionsSummary || (Array.isArray(selectedTopics) ? selectedTopics.join(", ") : "כל 100 הסעיפים (פרקים 1-11)");
 
-      // Check if email already signed to prevent duplicates in DB and Sheets
+      // Check if email already signed - if so, update their selected_sections and forward update to Sheets!
       try {
         const db = getDatabase();
         const existing = await db.sql`
@@ -162,7 +229,35 @@ export default async (req) => {
           LIMIT 1
         `;
         if (existing.length > 0) {
-          return new Response(JSON.stringify({ status: "success", alreadySigned: true }), {
+          try {
+            await db.sql`
+              UPDATE amana_signatures 
+              SET selected_sections = ${sectionsText}, name = ${name}, hide_name = ${Boolean(hideName)}
+              WHERE LOWER(TRIM(email)) = ${email.toLowerCase().trim()}
+            `;
+          } catch (updErr) {
+            console.error("Error updating existing record in db:", updErr);
+          }
+          // Forward update to Google Sheets
+          try {
+            await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: JSON.stringify({
+                action: "sign_amana",
+                name,
+                email,
+                hideName: Boolean(hideName),
+                selectedSections: sectionsText,
+                timestamp: new Date().toISOString()
+              }),
+              signal: AbortSignal.timeout(8000)
+            });
+          } catch (sheetErr) {
+            console.error("Error updating Google Sheets:", sheetErr);
+          }
+
+          return new Response(JSON.stringify({ status: "success", updated: true }), {
             status: 200,
             headers: { 
               "Content-Type": "application/json",
@@ -173,8 +268,6 @@ export default async (req) => {
       } catch (checkErr) {
         console.error("Duplicate check error:", checkErr);
       }
-
-      const sectionsText = selectedSectionsSummary || (Array.isArray(selectedTopics) ? selectedTopics.join(", ") : "כל סעיפי האמנה");
 
       // 1. Save to Netlify Postgres Database
       const saveDbPromise = (async () => {
