@@ -1,6 +1,6 @@
 import { getDatabase } from "@netlify/database";
 
-const GOOGLE_SHEETS_AMANA_WEBHOOK = "https://script.google.com/macros/s/AKfycbzpOrk30NTdDkRrIJMFhRuXtRpJlfJaOJabem2t9xtcdu1J2TupIPUXkNl7BBYOBtEg2w/exec";
+const GOOGLE_SHEETS_AMANA_WEBHOOK = "https://script.google.com/macros/s/AKfycbx1CE_NjUQ4WGN3ovmePw6OoDJGMQDP1NVNruT5v54JvngwuXdMsi9FOUpcuQI44uwUaQ/exec";
 
 // In-memory cache for Google Sheets data to keep API response times ultra-fast (<50ms)
 let sheetCache = {
