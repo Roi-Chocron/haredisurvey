@@ -84,6 +84,57 @@ export default async (req) => {
       }
     }
 
+    // Clean test data and empty rows from database and Google Sheets
+    if (url.searchParams.get("action") === "clean_test_data" || url.searchParams.get("clean") === "test_data") {
+      try {
+        const db = getDatabase();
+        const deleted = await db.sql`
+          DELETE FROM amana_signatures 
+          WHERE 
+            name ILIKE '%בדיקה%' 
+            OR name ILIKE '%check%' 
+            OR name ILIKE '%test%' 
+            OR email ILIKE '%test%' 
+            OR email ILIKE '%example.com%' 
+            OR email ILIKE '%check%' 
+            OR email = '123@1.1'
+            OR TRIM(name) = '' 
+            OR TRIM(email) = ''
+          RETURNING id, name, email
+        `;
+        sheetCache.timestamp = 0; // invalidate cache
+
+        // Also notify Google Sheets webhook to clean
+        let sheetsCleanRes = null;
+        try {
+          const gRes = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "clean_test_data" }),
+            signal: AbortSignal.timeout(10000)
+          });
+          sheetsCleanRes = await gRes.json().catch(() => null);
+        } catch (gErr) {
+          sheetsCleanRes = { error: gErr.message };
+        }
+
+        return new Response(JSON.stringify({ 
+          status: "success", 
+          deletedDbCount: deleted.length, 
+          deletedDbRows: deleted,
+          sheetsCleanRes
+        }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    }
+
     // Sync all database signatures with selected_sections to Google Sheets
     if (url.searchParams.get("sync") === "sheets") {
       try {

@@ -51,9 +51,27 @@ function ensureHeaders(sheet) {
   }
 }
 
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu("פעולות אמנה")
+    .addItem("🧹 נקה שורות בדיקה וכפילויות", "cleanDuplicatesFromSheet")
+    .addToUi();
+}
+
 function doGet(e) {
   try {
     var sheet = getTargetSheet();
+
+    // אפשרות להפעלת ניקוי ישירות דרך כתובת ה-GET
+    if (e && e.parameter && (e.parameter.action === "cleanup" || e.parameter.clean === "test_data")) {
+      var cleanStats = cleanDuplicatesFromSheet();
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        action: "cleanup",
+        details: cleanStats
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var lastRow = sheet.getLastRow();
     
     if (lastRow < 2) {
@@ -138,7 +156,17 @@ function doPost(e) {
       }
     }
 
-    // 1. תמיכה בסנכרון מהיר (Batch Sync) ממסד הנתונים
+    // 1. תמיכה בניקוי שורות ריקות ובדיקות (Cleanup)
+    if (data.action === "clean_test_data" || data.action === "cleanup") {
+      var cleanStats = cleanDuplicatesFromSheet();
+      return ContentService.createTextOutput(JSON.stringify({ 
+        status: "success", 
+        action: "cleanup",
+        details: cleanStats 
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 2. תמיכה בסנכרון מהיר (Batch Sync) ממסד הנתונים
     if (data.action === "batch_sync" && Array.isArray(data.signatures)) {
       var batchRes = handleBatchSync(sheet, data.signatures);
       return ContentService.createTextOutput(JSON.stringify(batchRes))
@@ -289,7 +317,7 @@ function findFirstEmptyRow(sheet) {
 function cleanDuplicatesFromSheet() {
   var sheet = getTargetSheet();
   var lastRow = sheet.getLastRow();
-  if (lastRow < 2) return;
+  if (lastRow < 2) return { deletedCount: 0, remainingRows: 0 };
   
   var maxCols = Math.max(sheet.getLastColumn(), 5);
   var range = sheet.getRange(2, 1, lastRow - 1, maxCols);
@@ -299,10 +327,24 @@ function cleanDuplicatesFromSheet() {
   
   for (var i = 0; i < values.length; i++) {
     var actualRowIndex = i + 2;
-    var name = (values[i][1] || "").toString().trim();
-    var email = (values[i][2] || "").toString().toLowerCase().trim();
+    var name = (values[i][1] || "").toString().trim().toLowerCase();
+    var email = (values[i][2] || "").toString().trim().toLowerCase();
     
-    if (!email || email.indexOf("test") !== -1 || email.indexOf("example.com") !== -1 || name === "בדיקה") {
+    // בדיקה אם השורה ריקה לחלוטין או מכילה נתוני בדיקה
+    var isTestOrEmpty = (
+      !email || 
+      !name ||
+      name.indexOf("בדיקה") !== -1 || 
+      name.indexOf("check") !== -1 || 
+      name.indexOf("test") !== -1 ||
+      email.indexOf("test") !== -1 || 
+      email.indexOf("example.com") !== -1 || 
+      email.indexOf("check") !== -1 ||
+      email === "123@1.1" ||
+      email.indexOf("@a.a") !== -1
+    );
+
+    if (isTestOrEmpty) {
       rowsToDelete.push(actualRowIndex);
       continue;
     }
@@ -314,9 +356,15 @@ function cleanDuplicatesFromSheet() {
     }
   }
   
+  // מחיקה בסדר יורד מלמטה למעלה כדי לשמור על אינדקס השורות
   for (var j = rowsToDelete.length - 1; j >= 0; j--) {
     sheet.deleteRow(rowsToDelete[j]);
   }
   
-  Logger.log("נמחקו " + rowsToDelete.length + " שורות כפולות/בדיקה בהצלחה.");
+  var remaining = sheet.getLastRow() - 1;
+  Logger.log("נמחקו " + rowsToDelete.length + " שורות כפולות/בדיקה/ריקות. נותרו: " + remaining);
+  return {
+    deletedCount: rowsToDelete.length,
+    remainingRows: remaining
+  };
 }
