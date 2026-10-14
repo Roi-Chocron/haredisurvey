@@ -18,12 +18,7 @@
 
 function getTargetSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  // אם יש גיליון פעיל עם שורות נתונים נשתמש בו, אחרת נחפש גיליון1 או גיבוי_חתימות
-  var active = ss.getActiveSheet();
-  if (active && active.getLastRow() > 1) {
-    return active;
-  }
-  return ss.getSheetByName("גיבוי_חתימות") || ss.getSheetByName("גיליון1") || active;
+  return ss.getSheetByName("גיבוי_חתימות") || ss.getSheetByName("גיליון1") || ss.getActiveSheet();
 }
 
 function ensureHeaders(sheet) {
