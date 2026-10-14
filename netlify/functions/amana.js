@@ -103,33 +103,71 @@ export default async (req) => {
           `;
         }
 
+        const preparedRows = rows.map(r => ({
+          name: normalizeName(r.name),
+          email: r.email,
+          hideName: Boolean(r.hide_name),
+          hide_name: Boolean(r.hide_name),
+          selectedSections: r.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
+          selected_sections: r.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
+          sections: r.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
+          timestamp: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()
+        }));
+
+        // 1. Try instant batch sync
+        try {
+          const batchRes = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "batch_sync",
+              signatures: preparedRows
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+          const batchData = await batchRes.json().catch(() => null);
+          if (batchData && (batchData.status === "success" || batchData.updatedCount !== undefined)) {
+            return new Response(JSON.stringify({ 
+              status: "success", 
+              mode: "batch", 
+              total: rows.length, 
+              details: batchData 
+            }), {
+              status: 200,
+              headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+            });
+          }
+        } catch (bErr) {
+          console.log("Batch sync fallback:", bErr.message);
+        }
+
+        // 2. Fallback to parallel individual posts
         let syncedCount = 0;
-        for (let i = 0; i < rows.length; i += 3) {
-          const batch = rows.slice(i, i + 3);
+        for (let i = 0; i < preparedRows.length; i += 5) {
+          const batch = preparedRows.slice(i, i + 5);
           await Promise.all(batch.map(async (row) => {
             try {
               const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({
                   action: "sign_amana",
                   name: row.name,
                   email: row.email,
-                  hideName: Boolean(row.hide_name),
-                  selectedSections: row.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
-                  timestamp: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString()
+                  hideName: row.hideName,
+                  selectedSections: row.selectedSections,
+                  selected_sections: row.selectedSections,
+                  sections: row.selectedSections,
+                  timestamp: row.timestamp
                 }),
-                signal: AbortSignal.timeout(8000)
+                signal: AbortSignal.timeout(6000)
               });
               if (res.ok) syncedCount++;
             } catch (err) {}
           }));
-          if (i + 3 < rows.length) {
-            await new Promise((r) => setTimeout(r, 300));
-          }
         }
 
-        return new Response(JSON.stringify({ status: "success", syncedCount, total: rows.length }), {
+        return new Response(JSON.stringify({ status: "success", mode: "individual", syncedCount, total: rows.length }), {
           status: 200,
           headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
         });
@@ -242,13 +280,16 @@ export default async (req) => {
           try {
             await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
               method: "POST",
-              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
               body: JSON.stringify({
                 action: "sign_amana",
                 name,
                 email,
                 hideName: Boolean(hideName),
+                hide_name: Boolean(hideName),
                 selectedSections: sectionsText,
+                selected_sections: sectionsText,
+                sections: sectionsText,
                 timestamp: new Date().toISOString()
               }),
               signal: AbortSignal.timeout(8000)
@@ -304,13 +345,16 @@ export default async (req) => {
         try {
           const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               action: "sign_amana",
               name,
               email,
               hideName: Boolean(hideName),
+              hide_name: Boolean(hideName),
               selectedSections: sectionsText,
+              selected_sections: sectionsText,
+              sections: sectionsText,
               timestamp: new Date().toISOString()
             }),
             signal: AbortSignal.timeout(8000)
