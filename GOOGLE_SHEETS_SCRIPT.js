@@ -237,12 +237,14 @@ function fixMissingTimestamps() {
 
   var range = sheet.getRange(2, 1, lastRow - 1, 3);
   var values = range.getValues();
+  var displayValues = range.getDisplayValues();
   var fixedCount = 0;
   var rowsToDelete = [];
 
   for (var i = 0; i < values.length; i++) {
     var rowNum = i + 2;
-    var dateVal = (values[i][0] || "").toString().trim();
+    var rawVal = values[i][0];
+    var displayVal = (displayValues[i][0] || "").toString().trim();
     var name = (values[i][1] || "").toString().trim();
     var email = (values[i][2] || "").toString().toLowerCase().trim();
 
@@ -252,16 +254,22 @@ function fixMissingTimestamps() {
       continue;
     }
 
-    // בדיקה אם חסרה שעה מדויקת (אין נקודתיים בשדה התאריך)
-    if (dateVal && dateVal.indexOf(":") === -1) {
+    // בדיקה אם חסרה שעה מדויקת (אין נקודתיים בתצוגה או שהשעה היא חצות 00:00:00)
+    var isMidnightDate = (rawVal instanceof Date && rawVal.getHours() === 0 && rawVal.getMinutes() === 0 && rawVal.getSeconds() === 0);
+    var isMissingColon = (displayVal && displayVal.indexOf(":") === -1);
+
+    if (isMidnightDate || isMissingColon || KNOWN_EXACT_TIMESTAMPS[email]) {
       var exactTime = emailTimeMap[email];
       if (!exactTime) {
-        exactTime = dateVal + " 10:00:00";
+        exactTime = (displayVal || Utilities.formatDate(new Date(rawVal), "Asia/Jerusalem", "dd/MM/yyyy")) + " 10:00:00";
       }
-      var cell = sheet.getRange(rowNum, 1);
-      cell.setValue(exactTime);
-      cell.setNumberFormat("@");
-      fixedCount++;
+      // עדכון אם התצוגה חסרה או שהשעה השתנתה
+      if (displayVal !== exactTime) {
+        var cell = sheet.getRange(rowNum, 1);
+        cell.setValue(exactTime);
+        cell.setNumberFormat("@");
+        fixedCount++;
+      }
     }
   }
 

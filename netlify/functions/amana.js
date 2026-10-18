@@ -1,6 +1,6 @@
 import { getDatabase } from "@netlify/database";
 
-const GOOGLE_SHEETS_AMANA_WEBHOOK = "https://script.google.com/macros/s/AKfycbx1CE_NjUQ4WGN3ovmePw6OoDJGMQDP1NVNruT5v54JvngwuXdMsi9FOUpcuQI44uwUaQ/exec";
+const GOOGLE_SHEETS_AMANA_WEBHOOK = "https://script.google.com/macros/s/AKfycbzk9m6bvyFX-Fi_flymmE9YEGlaSfhKwImBEjHceVgOEPE-gC4vK6ycNhkYmnc9zZTDfg/exec";
 const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/1pcD9QWdM6D04acwRcGfkoB_BcBe2nAyeIIE3Mej0vWA/export?format=csv";
 
 // 23 Fabricated alphabet signatures to exclude and clean
