@@ -38,7 +38,7 @@ let sheetCache = {
 };
 const CACHE_TTL_MS = 25000; // 25 seconds cache
 let lastSyncTimestamp = 0;
-const SYNC_INTERVAL_MS = 30000; // 30 seconds sync interval
+const SYNC_INTERVAL_MS = 25000; // 25 seconds sync interval
 
 function normalizeName(name) {
   if (!name) return "";
@@ -49,6 +49,27 @@ function normalizeName(name) {
     return "אביה רווח";
   }
   return trimmed;
+}
+
+function parseIsraeliDateTime(str) {
+  if (!str) return new Date();
+  const trimmed = str.toString().trim();
+  if (trimmed.includes("T") || trimmed.includes("Z")) {
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) return d;
+  }
+  const match = trimmed.match(/^(\d{1,2})[\/\.](\d{1,2})[\/\.](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (match) {
+    const day = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const year = parseInt(match[3], 10);
+    const hours = match[4] ? parseInt(match[4], 10) : 12;
+    const minutes = match[5] ? parseInt(match[5], 10) : 0;
+    const seconds = match[6] ? parseInt(match[6], 10) : 0;
+    return new Date(Date.UTC(year, month, day, hours - 3, minutes, seconds));
+  }
+  const fallback = new Date(trimmed);
+  return isNaN(fallback.getTime()) ? new Date() : fallback;
 }
 
 function parseCSVRow(line) {
@@ -130,7 +151,7 @@ async function syncFromGoogleSheets(db, force = false) {
 
     let dbRows;
     try {
-      dbRows = await db.sql`SELECT id, name, email, hide_name, selected_sections FROM amana_signatures`;
+      dbRows = await db.sql`SELECT id, name, email, hide_name, selected_sections, created_at FROM amana_signatures`;
     } catch (e) {
       dbRows = await db.sql`SELECT id, name, email, hide_name FROM amana_signatures`;
     }
@@ -175,16 +196,24 @@ async function syncFromGoogleSheets(db, force = false) {
         }
       } else {
         // New row added in Google Sheets
+        const createdAt = parseIsraeliDateTime(sRow.dateStr);
         try {
           await db.sql`
-            INSERT INTO amana_signatures (name, email, hide_name, selected_sections)
-            VALUES (${sRow.name}, ${em}, ${sRow.hideName}, ${sRow.sections})
+            INSERT INTO amana_signatures (name, email, hide_name, selected_sections, created_at)
+            VALUES (${sRow.name}, ${em}, ${sRow.hideName}, ${sRow.sections}, ${createdAt})
           `;
         } catch (insErr) {
-          await db.sql`
-            INSERT INTO amana_signatures (name, email, hide_name)
-            VALUES (${sRow.name}, ${em}, ${sRow.hideName})
-          `;
+          try {
+            await db.sql`
+              INSERT INTO amana_signatures (name, email, hide_name, selected_sections)
+              VALUES (${sRow.name}, ${em}, ${sRow.hideName}, ${sRow.sections})
+            `;
+          } catch (fErr) {
+            await db.sql`
+              INSERT INTO amana_signatures (name, email, hide_name)
+              VALUES (${sRow.name}, ${em}, ${sRow.hideName})
+            `;
+          }
         }
         insertedCount++;
       }
@@ -369,72 +398,6 @@ export default async (req) => {
       }
     }
 
-    // Sync all database signatures to Google Sheets (DB -> Sheets push)
-    if (url.searchParams.get("sync") === "sheets") {
-      try {
-        const db = getDatabase();
-        let rows;
-        try {
-          rows = await db.sql`
-            SELECT id, name, email, hide_name, selected_sections, created_at 
-            FROM amana_signatures 
-            ORDER BY id ASC
-          `;
-        } catch (colErr) {
-          rows = await db.sql`
-            SELECT id, name, email, hide_name, created_at 
-            FROM amana_signatures 
-            ORDER BY id ASC
-          `;
-        }
-
-        const preparedRows = rows.map(r => ({
-          name: normalizeName(r.name),
-          email: r.email,
-          hideName: Boolean(r.hide_name),
-          hide_name: Boolean(r.hide_name),
-          selectedSections: r.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
-          selected_sections: r.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
-          sections: r.selected_sections || "כל 100 הסעיפים (פרקים 1-11)",
-          timestamp: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()
-        }));
-
-        try {
-          const batchRes = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              action: "batch_sync",
-              signatures: preparedRows
-            }),
-            signal: AbortSignal.timeout(10000)
-          });
-          const batchData = await batchRes.json().catch(() => null);
-          if (batchData && (batchData.status === "success" || batchData.updatedCount !== undefined)) {
-            return new Response(JSON.stringify({ 
-              status: "success", 
-              mode: "batch", 
-              total: rows.length, 
-              details: batchData 
-            }), {
-              status: 200,
-              headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-            });
-          }
-        } catch (bErr) {}
-
-        return new Response(JSON.stringify({ status: "success", total: rows.length }), {
-          status: 200,
-          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-        });
-      } catch (syncErr) {
-        return new Response(JSON.stringify({ error: syncErr.message }), {
-          status: 500,
-          headers: { "Content-Type": "application/json" }
-        });
-      }
-    }
-
     try {
       const db = getDatabase();
 
@@ -517,7 +480,7 @@ export default async (req) => {
         });
       }
 
-      let { name, email, hideName, selectedSectionsSummary, selectedTopics } = body;
+      let { name, email, hideName, selectedSectionsSummary, selectedTopics, timestamp } = body;
 
       if (!name || !email) {
         return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -528,6 +491,7 @@ export default async (req) => {
 
       name = normalizeName(name);
       const sectionsText = selectedSectionsSummary || (Array.isArray(selectedTopics) ? selectedTopics.join(", ") : "כל 100 הסעיפים (פרקים 1-11)");
+      const createdAt = parseIsraeliDateTime(timestamp);
 
       // Check if email already signed - if so, update their selected_sections and forward update to Sheets
       try {
@@ -561,7 +525,7 @@ export default async (req) => {
                 selectedSections: sectionsText,
                 selected_sections: sectionsText,
                 sections: sectionsText,
-                timestamp: new Date().toISOString()
+                timestamp: createdAt.toISOString()
               }),
               signal: AbortSignal.timeout(8000)
             });
@@ -589,20 +553,20 @@ export default async (req) => {
           const db = getDatabase();
           try {
             await db.sql`
-              INSERT INTO amana_signatures (name, email, hide_name, selected_sections)
-              VALUES (${name}, ${email}, ${Boolean(hideName)}, ${sectionsText})
+              INSERT INTO amana_signatures (name, email, hide_name, selected_sections, created_at)
+              VALUES (${name}, ${email}, ${Boolean(hideName)}, ${sectionsText}, ${createdAt})
             `;
           } catch (colErr) {
             try {
               await db.sql`ALTER TABLE amana_signatures ADD COLUMN IF NOT EXISTS selected_sections TEXT`;
               await db.sql`
-                INSERT INTO amana_signatures (name, email, hide_name, selected_sections)
-                VALUES (${name}, ${email}, ${Boolean(hideName)}, ${sectionsText})
+                INSERT INTO amana_signatures (name, email, hide_name, selected_sections, created_at)
+                VALUES (${name}, ${email}, ${Boolean(hideName)}, ${sectionsText}, ${createdAt})
               `;
             } catch (fallbackErr) {
               await db.sql`
-                INSERT INTO amana_signatures (name, email, hide_name)
-                VALUES (${name}, ${email}, ${Boolean(hideName)})
+                INSERT INTO amana_signatures (name, email, hide_name, created_at)
+                VALUES (${name}, ${email}, ${Boolean(hideName)}, ${createdAt})
               `;
             }
           }
@@ -628,7 +592,7 @@ export default async (req) => {
               selectedSections: sectionsText,
               selected_sections: sectionsText,
               sections: sectionsText,
-              timestamp: new Date().toISOString()
+              timestamp: createdAt.toISOString()
             }),
             signal: AbortSignal.timeout(8000)
           });
