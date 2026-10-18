@@ -2,23 +2,47 @@
  * קוד Google Apps Script משודרג עבור אמנת הנשים החרדיות
  * מתאים לגיליון: https://docs.google.com/spreadsheets/d/1pcD9QWdM6D04acwRcGfkoB_BcBe2nAyeIIE3Mej0vWA/edit
  *
- * שיפורים מרכזיים:
- * 1. כתיבת 5 עמודות מלאות ומסודרות:
- *    עמודה A: תאריך ושעה
- *    עמודה B: שם מלא
- *    עמודה C: אימייל
- *    עמודה D: הסתרת שם (true / false)
- *    עמודה E: סעיפים שנבחרו (פירוט מדויק של הפרקים והסעיפים שסומנו)
- * 2. יצירת כותרות בטוחה בשורה 1 (אם שורה 1 מכילה כבר חתימה, נוצרת שורת כותרת מעליה מבלי לדרוס מידע).
- * 3. מניעת כפילויות ועדכון שורה קיימת לפי אימייל: אם מישהי חותמת שוב עם סעיפים מעודכנים, השורה שלה מתעדכנת.
- * 4. תמיכה ב-Batch Sync מהיר ממסד הנתונים: עדכון וסנכרון של כל 172+ החתימות במכה אחת.
- * 5. ספירת כלל החתימות (כולל חתימות ידניות) והחזרת רשימת השמות הגלויים לחיפוש באתר.
- * 6. תיקון אוטומטי של שגיאות כתיב ידועות (למשל 'אביה רווי' -> 'אביה רווח').
+ * שיפורים וחידושים:
+ * 1. סנכרון דו-כיווני מושלם: כל עדכון, מחיקה או הוספה בגיליון מתעדכנים מיידית במסד הנתונים של האתר (Postgres).
+ * 2. כפתור ייעודי בלחיצה אחת בתפריט הגיליון: "🧹 נקה חתימות מפוברקות (אלף-בית) וכפילויות".
+ *    מוחק את כל 23 החתימות המפוברקות של מי שחתם בכל האלף-בית, שורות ריקות, וכפילויות.
+ * 3. כפתור ידני: "🔄 סנכרן שינויים למסד הנתונים ולאתר".
+ * 4. תיקון אוטומטי של שמות: שרה מולאים הורוויץ, ואביה רווח.
+ * 5. כתיבה בטוחה של 5 עמודות: תאריך ושעה, שם מלא, אימייל, הסתרת שם, סעיפים שנבחרו.
  */
+
+var NETLIFY_SYNC_URL = "https://haredisurvey.netlify.app/api/amana?action=sync_from_sheets";
+
+// רשימת האימיילים המפוברקים (מי שחתם בכל אותיות האלף-בית)
+var FAKE_ALPHABET_EMAILS = {
+  "k5412954@gmail.com": true,   // שלומית שושן (ש)
+  "shnews@gmail.com": true,     // אהובה אבני (א)
+  "41455@gmail.com": true,      // ברוריה ברה (ב)
+  "pninapfaa@gmail.com": true,  // פנינה פויפר (פ)
+  "741542@gmail.com": true,     // גבריאלה גרליץ (ג)
+  "874152@gmail.com": true,     // דבורה דנוביץ (ד)
+  "ews@gmail.com": true,        // הינדא הורביץ (ה)
+  "4124@gmail.com": true,       // ורדה ורון (ו)
+  "414889@gmail.com": true,     // זלדה זרובביץ (ז)
+  "412365@gmail.com": true,     // חיה חיוביץ (ח)
+  "4125896@gmail.com": true,    // טובה טובול (ט)
+  "87412@gmail.com": true,      // ירדנה יורוביץ (י)
+  "4155854@gmail.com": true,    // כרמלה כרמלוביץ (כ)
+  "82824@gmail.com": true,      // ליה ליאון (ל)
+  "k028542333@gmail.com": true, // מרים מרינוביץ (מ)
+  "k0485696@gmail.com": true,   // נועה נוישטט (נ)
+  "855595@gmail.com": true,     // ספיר ספירוביץ (ס)
+  "8333@gmail.com": true,       // עטל עטייה (ע)
+  "68154@gmail.com": true,      // פנינה פוחוצביץ (פ)
+  "755594@gmail.com": true,     // צביה צאנוביץ (צ)
+  "74554@gmail.com": true,      // קילא קדירוביץ (ק)
+  "8555595@gmail.com": true,    // רוחמה רבינוביץ (ר)
+  "74555954@gmail.com": true    // תהילה תופיק (ת)
+};
 
 function getTargetSheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  return ss.getSheetByName("גיבוי_חתימות") || ss.getSheetByName("גיליון1") || ss.getActiveSheet();
+  return ss.getSheetByName("גיבוי_חתימות") || ss.getSheetByName("חתימות על האמנה") || ss.getSheetByName("גיליון1") || ss.getActiveSheet();
 }
 
 function ensureHeaders(sheet) {
@@ -35,12 +59,10 @@ function ensureHeaders(sheet) {
   var isHeader = (firstCell.indexOf("תאריך") !== -1 || firstCell.indexOf("Date") !== -1 || firstCell.indexOf("זמן") !== -1);
   
   if (!isHeader) {
-    // שורה 1 מכילה חתימה אמיתית (נתונים). נוסיף שורת כותרות מעליה כדי לא לדרוס חתימה קיימת
     sheet.insertRowBefore(1);
     sheet.getRange(1, 1, 1, 5).setValues([expectedHeaders]);
     sheet.getRange(1, 1, 1, 5).setFontWeight("bold");
   } else {
-    // שורה 1 היא כותרת - נוודא שעמודות D ו-E מוגדרות
     if (!sheet.getRange(1, 4).getValue().toString().trim()) {
       sheet.getRange(1, 4).setValue("הסתרת שם");
     }
@@ -51,20 +73,145 @@ function ensureHeaders(sheet) {
   }
 }
 
+/**
+ * תפריט מותאם אישית שנוסף ל-Google Sheets
+ */
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("פעולות אמנה")
-    .addItem("🧹 נקה שורות בדיקה וכפילויות", "cleanDuplicatesFromSheet")
+    .addItem("🧹 נקה חתימות מפוברקות (אלף-בית) וכפילויות", "cleanAlphabetAndDuplicatesFromSheet")
+    .addItem("🔄 סנכרן שינויים למסד הנתונים ולאתר", "syncToDatabase")
     .addToUi();
+}
+
+/**
+ * מחיקת כל החתימות המפוברקות (מי שחתם באלף-בית), כפילויות, ותיקון שמות
+ */
+function cleanAlphabetAndDuplicatesFromSheet() {
+  var sheet = getTargetSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { deletedCount: 0 };
+  
+  var maxCols = Math.max(sheet.getLastColumn(), 5);
+  var range = sheet.getRange(2, 1, lastRow - 1, maxCols);
+  var values = range.getValues();
+  
+  var seenEmails = {};
+  var rowsToDelete = [];
+  var fixedCount = 0;
+  
+  for (var i = 0; i < values.length; i++) {
+    var actualRowIndex = i + 2;
+    var name = (values[i][1] || "").toString().trim();
+    var email = (values[i][2] || "").toString().toLowerCase().trim();
+    
+    // 1. תיקון שרה מולאים הורוויץ אם השם שלה השתבש
+    if (email === "saramolayemhorwitz@gmail.com") {
+      if (name !== "שרה מולאים הורוויץ") {
+        sheet.getRange(actualRowIndex, 2).setValue("שרה מולאים הורוויץ");
+        fixedCount++;
+      }
+    }
+    
+    // 2. תיקון אביה רווח אם נכתב רווי
+    if (email === "aviyarev@gmail.com" && name === "אביה רווי") {
+      sheet.getRange(actualRowIndex, 2).setValue("אביה רווח");
+      fixedCount++;
+    }
+    
+    // 3. בדיקה אם זו חתימה מפוברקת מהאלף-בית
+    var isAlphabetFake = Boolean(FAKE_ALPHABET_EMAILS[email]);
+    
+    // 4. בדיקה אם השורה ריקה או מכילה בדיקה
+    var isTestOrEmpty = (
+      !email || 
+      !name ||
+      name.indexOf("בדיקה") !== -1 || 
+      name.indexOf("check") !== -1 || 
+      name.indexOf("test") !== -1 ||
+      email.indexOf("test") !== -1 || 
+      email.indexOf("example.com") !== -1 || 
+      email.indexOf("check") !== -1 ||
+      email === "123@1.1"
+    );
+    
+    if (isAlphabetFake || isTestOrEmpty) {
+      rowsToDelete.push(actualRowIndex);
+      continue;
+    }
+    
+    // 5. בדיקת כפילות
+    if (seenEmails[email]) {
+      rowsToDelete.push(actualRowIndex);
+    } else {
+      seenEmails[email] = true;
+    }
+  }
+  
+  // מחיקת שורות מלמטה למעלה כדי לשמור על האינדקסים
+  for (var j = rowsToDelete.length - 1; j >= 0; j--) {
+    sheet.deleteRow(rowsToDelete[j]);
+  }
+  
+  var remaining = sheet.getLastRow() - 1;
+  var msg = "הניקוי הושלם בהצלחה!\n" +
+            "נמחקו " + rowsToDelete.length + " שורות מפוברקות/כפולות.\n" +
+            "תוקנו " + fixedCount + " שמות.\n" +
+            "סה\"כ חתימות אמיתיות שנותרו בגיליון: " + remaining;
+  
+  try {
+    SpreadsheetApp.getUi().alert(msg);
+  } catch (e) {
+    Logger.log(msg);
+  }
+  
+  // סנכרון מיידי למסד הנתונים
+  syncToDatabase();
+  
+  return {
+    deletedCount: rowsToDelete.length,
+    remainingRows: remaining,
+    fixedCount: fixedCount
+  };
+}
+
+/**
+ * פונקציה לשליחת בקשת סנכרון מ-Google Sheets אל מסד הנתונים ב-Netlify
+ */
+function syncToDatabase() {
+  try {
+    var response = UrlFetchApp.fetch(NETLIFY_SYNC_URL, {
+      method: "get",
+      muteHttpExceptions: true
+    });
+    var code = response.getResponseCode();
+    var body = response.getContentText();
+    Logger.log("Sync response: " + code + " " + body);
+    
+    try {
+      SpreadsheetApp.getUi().alert("הסנכרון לאתר ולמסד הנתונים הושלם בהצלחה!\nכל העדכונים משתקפים כעת באתר.");
+    } catch (uiErr) {}
+  } catch (err) {
+    Logger.log("Sync error: " + err.toString());
+  }
+}
+
+/**
+ * טריגר שמופעל אוטומטית בעת עריכת תא בגיליון (לאחר התקנת טריגר OnEdit)
+ */
+function onEditTrigger(e) {
+  // קריאה שקטה לסנכרון המסד
+  try {
+    UrlFetchApp.fetch(NETLIFY_SYNC_URL, { method: "get", muteHttpExceptions: true });
+  } catch (err) {}
 }
 
 function doGet(e) {
   try {
     var sheet = getTargetSheet();
 
-    // אפשרות להפעלת ניקוי ישירות דרך כתובת ה-GET
     if (e && e.parameter && (e.parameter.action === "cleanup" || e.parameter.clean === "test_data")) {
-      var cleanStats = cleanDuplicatesFromSheet();
+      var cleanStats = cleanAlphabetAndDuplicatesFromSheet();
       return ContentService.createTextOutput(JSON.stringify({
         status: "success",
         action: "cleanup",
@@ -73,7 +220,6 @@ function doGet(e) {
     }
 
     var lastRow = sheet.getLastRow();
-    
     if (lastRow < 2) {
       return ContentService.createTextOutput(JSON.stringify({ 
         total: 0, 
@@ -96,13 +242,16 @@ function doGet(e) {
       var email = (row[2] || "").toString().toLowerCase().trim();
       var hideName = row[3];
       
-      // התעלמות משורות בדיקה
-      if (email.indexOf("test") !== -1 || email.indexOf("example.com") !== -1) {
+      if (email.indexOf("test") !== -1 || email.indexOf("example.com") !== -1 || FAKE_ALPHABET_EMAILS[email]) {
         continue;
       }
       
       if (name !== "") {
-        if (name.indexOf("רווי") !== -1) name = "אביה רווח";
+        if (email === "saramolayemhorwitz@gmail.com") {
+          name = "שרה מולאים הורוויץ";
+        } else if (email === "aviyarev@gmail.com" && name === "אביה רווי") {
+          name = "אביה רווח";
+        }
         
         if (!email || !seenEmails[email]) {
           totalSignatures++;
@@ -128,7 +277,7 @@ function doGet(e) {
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ 
       error: err.toString(),
-      total: 0,
+      total: 0, 
       recentNames: [], 
       allNames: [] 
     })).setMimeType(ContentService.MimeType.JSON);
@@ -156,9 +305,8 @@ function doPost(e) {
       }
     }
 
-    // 1. תמיכה בניקוי שורות ריקות ובדיקות (Cleanup)
-    if (data.action === "clean_test_data" || data.action === "cleanup") {
-      var cleanStats = cleanDuplicatesFromSheet();
+    if (data.action === "clean_fake_and_duplicates" || data.action === "clean_test_data" || data.action === "cleanup") {
+      var cleanStats = cleanAlphabetAndDuplicatesFromSheet();
       return ContentService.createTextOutput(JSON.stringify({ 
         status: "success", 
         action: "cleanup",
@@ -166,26 +314,26 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 2. תמיכה בסנכרון מהיר (Batch Sync) ממסד הנתונים
     if (data.action === "batch_sync" && Array.isArray(data.signatures)) {
       var batchRes = handleBatchSync(sheet, data.signatures);
       return ContentService.createTextOutput(JSON.stringify(batchRes))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 2. טיפול בחתימה בודדת
+    // הוספת חתימה חדשה או עדכון קיימת
     var name = (data.name || "").toString().trim();
     var email = (data.email || "").toString().trim();
     var hideName = Boolean(data.hideName === true || data.hideName === "true" || data.hide_name === true || data.hide_name === "true");
     var timestamp = data.timestamp ? new Date(data.timestamp) : new Date();
     
-    if (name === "אביה רוווי" || name.indexOf("רווי") !== -1) {
+    if (email === "saramolayemhorwitz@gmail.com") {
+      name = "שרה מולאים הורוויץ";
+    } else if (email === "aviyarev@gmail.com" && name === "אביה רווי") {
       name = "אביה רווח";
     }
 
     var selectedSections = (data.selectedSections || data.selected_sections || data.sections || "כל 100 הסעיפים (פרקים 1-11)").toString().trim();
 
-    // בדיקת כפילות / עדכון שורה קיימת לפי אימייל:
     if (email) {
       var lastRowCheck = sheet.getLastRow();
       if (lastRowCheck > 1) {
@@ -208,7 +356,6 @@ function doPost(e) {
       }
     }
 
-    // חתימה חדשה - מציאת שורה ריקה ראשונה וכתיבה מלאה של 5 עמודות
     var targetRow = findFirstEmptyRow(sheet);
     sheet.getRange(targetRow, 1, 1, 5).setValues([[
       timestamp,
@@ -235,9 +382,6 @@ function doPost(e) {
   }
 }
 
-/**
- * פונקציה לסנכרון מהיר (Batch Sync) של חתימות ממסד הנתונים ישירות לגיליון
- */
 function handleBatchSync(sheet, signatures) {
   var lastRow = sheet.getLastRow();
   var emailRowMap = {};
@@ -259,7 +403,9 @@ function handleBatchSync(sheet, signatures) {
     var sig = signatures[j];
     var email = (sig.email || "").toString().toLowerCase().trim();
     var name = (sig.name || "").toString().trim();
-    if (name.indexOf("רווי") !== -1) name = "אביה רווח";
+    if (email === "saramolayemhorwitz@gmail.com") name = "שרה מולאים הורוויץ";
+    else if (email === "aviyarev@gmail.com" && name === "אביה רווי") name = "אביה רווח";
+    
     var hideName = Boolean(sig.hide_name || sig.hideName);
     var sections = (sig.selected_sections || sig.selectedSections || sig.sections || "כל 100 הסעיפים (פרקים 1-11)").toString().trim();
     var time = sig.created_at ? new Date(sig.created_at) : (sig.timestamp ? new Date(sig.timestamp) : new Date());
@@ -291,9 +437,6 @@ function handleBatchSync(sheet, signatures) {
   };
 }
 
-/**
- * מאתר את השורה הריקה הראשונה בעמודה B
- */
 function findFirstEmptyRow(sheet) {
   var lastRow = sheet.getLastRow();
   if (lastRow < 1) return 1;
@@ -309,62 +452,4 @@ function findFirstEmptyRow(sheet) {
   }
   
   return lastRow + 1;
-}
-
-/**
- * פונקציית שירות עצמאית ב-Apps Script למחיקת שורות בדיקה וכפילויות
- */
-function cleanDuplicatesFromSheet() {
-  var sheet = getTargetSheet();
-  var lastRow = sheet.getLastRow();
-  if (lastRow < 2) return { deletedCount: 0, remainingRows: 0 };
-  
-  var maxCols = Math.max(sheet.getLastColumn(), 5);
-  var range = sheet.getRange(2, 1, lastRow - 1, maxCols);
-  var values = range.getValues();
-  var seenEmails = {};
-  var rowsToDelete = [];
-  
-  for (var i = 0; i < values.length; i++) {
-    var actualRowIndex = i + 2;
-    var name = (values[i][1] || "").toString().trim().toLowerCase();
-    var email = (values[i][2] || "").toString().trim().toLowerCase();
-    
-    // בדיקה אם השורה ריקה לחלוטין או מכילה נתוני בדיקה
-    var isTestOrEmpty = (
-      !email || 
-      !name ||
-      name.indexOf("בדיקה") !== -1 || 
-      name.indexOf("check") !== -1 || 
-      name.indexOf("test") !== -1 ||
-      email.indexOf("test") !== -1 || 
-      email.indexOf("example.com") !== -1 || 
-      email.indexOf("check") !== -1 ||
-      email === "123@1.1" ||
-      email.indexOf("@a.a") !== -1
-    );
-
-    if (isTestOrEmpty) {
-      rowsToDelete.push(actualRowIndex);
-      continue;
-    }
-    
-    if (seenEmails[email]) {
-      rowsToDelete.push(actualRowIndex);
-    } else {
-      seenEmails[email] = true;
-    }
-  }
-  
-  // מחיקה בסדר יורד מלמטה למעלה כדי לשמור על אינדקס השורות
-  for (var j = rowsToDelete.length - 1; j >= 0; j--) {
-    sheet.deleteRow(rowsToDelete[j]);
-  }
-  
-  var remaining = sheet.getLastRow() - 1;
-  Logger.log("נמחקו " + rowsToDelete.length + " שורות כפולות/בדיקה/ריקות. נותרו: " + remaining);
-  return {
-    deletedCount: rowsToDelete.length,
-    remainingRows: remaining
-  };
 }

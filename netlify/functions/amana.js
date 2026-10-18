@@ -1,14 +1,221 @@
 import { getDatabase } from "@netlify/database";
 
 const GOOGLE_SHEETS_AMANA_WEBHOOK = "https://script.google.com/macros/s/AKfycbx1CE_NjUQ4WGN3ovmePw6OoDJGMQDP1NVNruT5v54JvngwuXdMsi9FOUpcuQI44uwUaQ/exec";
+const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/1pcD9QWdM6D04acwRcGfkoB_BcBe2nAyeIIE3Mej0vWA/export?format=csv";
 
-// In-memory cache for Google Sheets data to keep API response times ultra-fast (<50ms)
+// 23 Fabricated alphabet signatures to exclude and clean
+const FAKE_ALPHABET_EMAILS = new Set([
+  "k5412954@gmail.com",
+  "shnews@gmail.com",
+  "41455@gmail.com",
+  "pninapfaa@gmail.com",
+  "741542@gmail.com",
+  "874152@gmail.com",
+  "ews@gmail.com",
+  "4124@gmail.com",
+  "414889@gmail.com",
+  "412365@gmail.com",
+  "4125896@gmail.com",
+  "87412@gmail.com",
+  "4155854@gmail.com",
+  "82824@gmail.com",
+  "k028542333@gmail.com",
+  "k0485696@gmail.com",
+  "855595@gmail.com",
+  "8333@gmail.com",
+  "68154@gmail.com",
+  "755594@gmail.com",
+  "74554@gmail.com",
+  "8555595@gmail.com",
+  "74555954@gmail.com"
+]);
+
+// In-memory cache for API response times (<50ms)
 let sheetCache = {
   timestamp: 0,
   total: 0,
   names: []
 };
 const CACHE_TTL_MS = 25000; // 25 seconds cache
+let lastSyncTimestamp = 0;
+const SYNC_INTERVAL_MS = 30000; // 30 seconds sync interval
+
+function normalizeName(name) {
+  if (!name) return "";
+  const trimmed = name.trim();
+  // Only normalize the specific typo 'אביה רווי' to 'אביה רווח'
+  // Do NOT match substrings like 'הורוויץ'
+  if (trimmed === "אביה רווי" || trimmed === "רווי") {
+    return "אביה רווח";
+  }
+  return trimmed;
+}
+
+function parseCSVRow(line) {
+  const parts = [];
+  let current = "";
+  let inQuotes = false;
+  for (let c = 0; c < line.length; c++) {
+    const ch = line[c];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      parts.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  parts.push(current.trim());
+  return parts;
+}
+
+function parseGoogleSheetsCSV(csvText) {
+  const lines = csvText.trim().split("\n");
+  if (lines.length < 2) return [];
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+    const parts = parseCSVRow(line);
+    const dateStr = parts[0] || "";
+    let name = (parts[1] || "").trim();
+    const email = (parts[2] || "").toLowerCase().trim();
+    const hideNameRaw = (parts[3] || "").toString().toLowerCase().trim();
+    const hideName = (hideNameRaw === "true" || hideNameRaw === "1");
+    const sections = (parts[4] || "כל 100 הסעיפים (פרקים 1-11)").trim();
+
+    // Skip empty, test, or known fake emails
+    if (!email || !email.includes("@") || !name) continue;
+    if (FAKE_ALPHABET_EMAILS.has(email)) continue;
+    if (email.includes("test") || email.includes("example.com") || email.includes("check") || email === "123@1.1") continue;
+    if (name.includes("בדיקה") || name.includes("test") || name.includes("check")) continue;
+
+    if (email === "saramolayemhorwitz@gmail.com") {
+      name = "שרה מולאים הורוויץ";
+    } else {
+      name = normalizeName(name);
+    }
+
+    rows.push({
+      dateStr,
+      name,
+      email,
+      hideName,
+      sections
+    });
+  }
+  return rows;
+}
+
+async function syncFromGoogleSheets(db, force = false) {
+  const now = Date.now();
+  if (!force && (now - lastSyncTimestamp < SYNC_INTERVAL_MS)) {
+    return { status: "cached", reason: "throttled" };
+  }
+  lastSyncTimestamp = now;
+
+  try {
+    const res = await fetch(GOOGLE_SHEETS_CSV_URL, { signal: AbortSignal.timeout(7000) });
+    if (!res.ok) {
+      return { status: "error", message: "Failed to fetch Google Sheets CSV: " + res.status };
+    }
+    const csv = await res.text();
+    const sheetRows = parseGoogleSheetsCSV(csv);
+
+    if (sheetRows.length < 30) {
+      // Safety guard against empty/partial sheet
+      return { status: "skipped", reason: "too_few_rows", count: sheetRows.length };
+    }
+
+    let dbRows;
+    try {
+      dbRows = await db.sql`SELECT id, name, email, hide_name, selected_sections FROM amana_signatures`;
+    } catch (e) {
+      dbRows = await db.sql`SELECT id, name, email, hide_name FROM amana_signatures`;
+    }
+
+    const dbMap = new Map();
+    for (const r of dbRows) {
+      const em = (r.email || "").toLowerCase().trim();
+      if (em && !dbMap.has(em)) {
+        dbMap.set(em, r);
+      }
+    }
+
+    const validSheetEmails = new Set();
+    let updatedCount = 0;
+    let insertedCount = 0;
+
+    for (const sRow of sheetRows) {
+      const em = sRow.email;
+      validSheetEmails.add(em);
+      const existing = dbMap.get(em);
+
+      if (existing) {
+        const nameChanged = existing.name !== sRow.name;
+        const hideChanged = Boolean(existing.hide_name) !== Boolean(sRow.hideName);
+        const sectionsChanged = (existing.selected_sections || "") !== (sRow.sections || "");
+
+        if (nameChanged || hideChanged || sectionsChanged) {
+          try {
+            await db.sql`
+              UPDATE amana_signatures 
+              SET name = ${sRow.name}, hide_name = ${sRow.hideName}, selected_sections = ${sRow.sections}
+              WHERE LOWER(TRIM(email)) = ${em}
+            `;
+          } catch (updErr) {
+            await db.sql`
+              UPDATE amana_signatures 
+              SET name = ${sRow.name}, hide_name = ${sRow.hideName}
+              WHERE LOWER(TRIM(email)) = ${em}
+            `;
+          }
+          updatedCount++;
+        }
+      } else {
+        // New row added in Google Sheets
+        try {
+          await db.sql`
+            INSERT INTO amana_signatures (name, email, hide_name, selected_sections)
+            VALUES (${sRow.name}, ${em}, ${sRow.hideName}, ${sRow.sections})
+          `;
+        } catch (insErr) {
+          await db.sql`
+            INSERT INTO amana_signatures (name, email, hide_name)
+            VALUES (${sRow.name}, ${em}, ${sRow.hideName})
+          `;
+        }
+        insertedCount++;
+      }
+    }
+
+    // Delete rows removed from Google Sheets or in fake alphabet set
+    let deletedCount = 0;
+    if (validSheetEmails.size >= 50) {
+      for (const dRow of dbRows) {
+        const em = (dRow.email || "").toLowerCase().trim();
+        if (!validSheetEmails.has(em) || FAKE_ALPHABET_EMAILS.has(em)) {
+          await db.sql`DELETE FROM amana_signatures WHERE id = ${dRow.id}`;
+          deletedCount++;
+        }
+      }
+    }
+
+    sheetCache.timestamp = 0; // invalidate cache
+
+    return {
+      status: "success",
+      totalInSheet: sheetRows.length,
+      updatedCount,
+      insertedCount,
+      deletedCount
+    };
+  } catch (err) {
+    console.error("syncFromGoogleSheets error:", err);
+    return { status: "error", error: err.message };
+  }
+}
 
 async function fetchGoogleSheetsData() {
   const now = Date.now();
@@ -30,19 +237,8 @@ async function fetchGoogleSheetsData() {
         };
       }
     }
-  } catch (e) {
-    // If Google Sheets is slow or times out, proceed seamlessly with cached or DB data
-  }
+  } catch (e) {}
   return sheetCache;
-}
-
-function normalizeName(name) {
-  if (!name) return "";
-  const trimmed = name.trim();
-  if (trimmed === "אביה רווי" || trimmed.includes("רווי")) {
-    return "אביה רווח";
-  }
-  return trimmed;
 }
 
 export default async (req) => {
@@ -84,11 +280,61 @@ export default async (req) => {
       }
     }
 
-    // Clean test data and empty rows from database and Google Sheets
-    if (url.searchParams.get("action") === "clean_test_data" || url.searchParams.get("clean") === "test_data") {
+    // Force Sync from Google Sheets to Database
+    if (url.searchParams.get("action") === "sync_from_sheets" || url.searchParams.get("sync") === "from_sheets") {
       try {
         const db = getDatabase();
-        const deleted = await db.sql`
+        const syncRes = await syncFromGoogleSheets(db, true);
+        return new Response(JSON.stringify(syncRes), {
+          status: 200,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+    }
+
+    // Clean fake alphabet signatures, duplicates, and test data
+    if (
+      url.searchParams.get("action") === "clean_fake_and_duplicates" ||
+      url.searchParams.get("action") === "clean_test_data" || 
+      url.searchParams.get("action") === "cleanup" ||
+      url.searchParams.get("clean") === "test_data"
+    ) {
+      try {
+        const db = getDatabase();
+        
+        // 1. Delete duplicate for sari.vlado@gmail.com (id 5, keep id 6)
+        await db.sql`DELETE FROM amana_signatures WHERE id = 5 OR (email = 'sari.vlado@gmail.com' AND name = 'שרי ליבוביץ' AND id != 6)`;
+
+        // 2. Delete fake alphabet signatures
+        const deletedFakes = await db.sql`
+          DELETE FROM amana_signatures 
+          WHERE email IN (
+            'k5412954@gmail.com', 'shnews@gmail.com', '41455@gmail.com',
+            'pninapfaa@gmail.com', '741542@gmail.com', '874152@gmail.com',
+            'ews@gmail.com', '4124@gmail.com', '414889@gmail.com',
+            '412365@gmail.com', '4125896@gmail.com', '87412@gmail.com',
+            '4155854@gmail.com', '82824@gmail.com', 'k028542333@gmail.com',
+            'k0485696@gmail.com', '855595@gmail.com', '8333@gmail.com',
+            '68154@gmail.com', '755594@gmail.com', '74554@gmail.com',
+            '8555595@gmail.com', '74555954@gmail.com'
+          )
+          RETURNING id, name, email
+        `;
+
+        // 3. Restore Sara Molayem Horwitz
+        await db.sql`
+          UPDATE amana_signatures 
+          SET name = 'שרה מולאים הורוויץ' 
+          WHERE email = 'saramolayemhorwitz@gmail.com'
+        `;
+
+        // 4. Delete test / empty rows
+        const deletedTests = await db.sql`
           DELETE FROM amana_signatures 
           WHERE 
             name ILIKE '%בדיקה%' 
@@ -102,27 +348,15 @@ export default async (req) => {
             OR TRIM(email) = ''
           RETURNING id, name, email
         `;
-        sheetCache.timestamp = 0; // invalidate cache
 
-        // Also notify Google Sheets webhook to clean
-        let sheetsCleanRes = null;
-        try {
-          const gRes = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "clean_test_data" }),
-            signal: AbortSignal.timeout(10000)
-          });
-          sheetsCleanRes = await gRes.json().catch(() => null);
-        } catch (gErr) {
-          sheetsCleanRes = { error: gErr.message };
-        }
+        sheetCache.timestamp = 0;
 
         return new Response(JSON.stringify({ 
           status: "success", 
-          deletedDbCount: deleted.length, 
-          deletedDbRows: deleted,
-          sheetsCleanRes
+          deletedFakesCount: deletedFakes.length,
+          deletedTestsCount: deletedTests.length,
+          deletedFakes,
+          deletedTests
         }), {
           status: 200,
           headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
@@ -135,7 +369,7 @@ export default async (req) => {
       }
     }
 
-    // Sync all database signatures with selected_sections to Google Sheets
+    // Sync all database signatures to Google Sheets (DB -> Sheets push)
     if (url.searchParams.get("sync") === "sheets") {
       try {
         const db = getDatabase();
@@ -165,7 +399,6 @@ export default async (req) => {
           timestamp: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()
         }));
 
-        // 1. Try instant batch sync
         try {
           const batchRes = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
             method: "POST",
@@ -188,37 +421,9 @@ export default async (req) => {
               headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
             });
           }
-        } catch (bErr) {
-          console.log("Batch sync fallback:", bErr.message);
-        }
+        } catch (bErr) {}
 
-        // 2. Fallback to parallel individual posts
-        let syncedCount = 0;
-        for (let i = 0; i < preparedRows.length; i += 5) {
-          const batch = preparedRows.slice(i, i + 5);
-          await Promise.all(batch.map(async (row) => {
-            try {
-              const res = await fetch(GOOGLE_SHEETS_AMANA_WEBHOOK, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify({
-                  action: "sign_amana",
-                  name: row.name,
-                  email: row.email,
-                  hideName: row.hideName,
-                  selectedSections: row.selectedSections,
-                  selected_sections: row.selectedSections,
-                  sections: row.selectedSections,
-                  timestamp: row.timestamp
-                }),
-                signal: AbortSignal.timeout(6000)
-              });
-              if (res.ok) syncedCount++;
-            } catch (err) {}
-          }));
-        }
-
-        return new Response(JSON.stringify({ status: "success", mode: "individual", syncedCount, total: rows.length }), {
+        return new Response(JSON.stringify({ status: "success", total: rows.length }), {
           status: 200,
           headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
         });
@@ -233,12 +438,18 @@ export default async (req) => {
     try {
       const db = getDatabase();
 
-      // Proactively fix any typo of 'רווי' to 'רווח' in database
+      // Automatically sync from Google Sheets if cache interval expired (keeps DB updated with any Google Sheets edits!)
       try {
-        await db.sql`UPDATE amana_signatures SET name = 'אביה רווח' WHERE name LIKE '%רווי%'`;
-      } catch (fixErr) {
-        // Non-critical if table is not yet created
+        await syncFromGoogleSheets(db);
+      } catch (syncErr) {
+        console.error("Auto sync from sheets error:", syncErr);
       }
+
+      // Proactively fix Aviya Rev typo and restore Sara Molayem Horwitz
+      try {
+        await db.sql`UPDATE amana_signatures SET name = 'אביה רווח' WHERE (name = 'אביה רווי' OR email = 'aviyarev@gmail.com') AND email != 'saramolayemhorwitz@gmail.com'`;
+        await db.sql`UPDATE amana_signatures SET name = 'שרה מולאים הורוויץ' WHERE email = 'saramolayemhorwitz@gmail.com'`;
+      } catch (fixErr) {}
 
       const countRes = await db.sql`SELECT COUNT(*)::int AS total FROM amana_signatures`;
       const allRes = await db.sql`
@@ -250,7 +461,6 @@ export default async (req) => {
       const dbTotal = countRes[0]?.total || 0;
       const dbNames = allRes.map((r) => normalizeName(r.name)).filter(Boolean);
 
-      // Total and names are pulled directly and strictly from the database
       const total = dbTotal;
       const recentNames = dbNames.slice(0, 12);
       const allNames = dbNames;
@@ -269,7 +479,6 @@ export default async (req) => {
       });
     } catch (err) {
       console.error("Database query error:", err);
-      // Fallback: try fetching from Google Sheets if database isn't populated or error occurs
       try {
         const gsData = await fetchGoogleSheetsData();
         const gsNames = (gsData.names || []).map(normalizeName).filter(Boolean);
@@ -293,10 +502,21 @@ export default async (req) => {
     }
   }
 
-  // POST: Save signature to Database and forward to Google Sheets
+  // POST: Save signature to Database and forward to Google Sheets (OR sync webhook)
   if (method === "POST") {
     try {
       const body = await req.json();
+
+      // Support sync_from_sheets via POST
+      if (body.action === "sync_from_sheets") {
+        const db = getDatabase();
+        const syncRes = await syncFromGoogleSheets(db, true);
+        return new Response(JSON.stringify(syncRes), {
+          status: 200,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+
       let { name, email, hideName, selectedSectionsSummary, selectedTopics } = body;
 
       if (!name || !email) {
@@ -309,7 +529,7 @@ export default async (req) => {
       name = normalizeName(name);
       const sectionsText = selectedSectionsSummary || (Array.isArray(selectedTopics) ? selectedTopics.join(", ") : "כל 100 הסעיפים (פרקים 1-11)");
 
-      // Check if email already signed - if so, update their selected_sections and forward update to Sheets!
+      // Check if email already signed - if so, update their selected_sections and forward update to Sheets
       try {
         const db = getDatabase();
         const existing = await db.sql`
@@ -348,6 +568,8 @@ export default async (req) => {
           } catch (sheetErr) {
             console.error("Error updating Google Sheets:", sheetErr);
           }
+
+          sheetCache.timestamp = 0;
 
           return new Response(JSON.stringify({ status: "success", updated: true }), {
             status: 200,
@@ -417,7 +639,6 @@ export default async (req) => {
         }
       })();
 
-      // Invalidate sheet cache so next GET reflects the new signature
       sheetCache.timestamp = 0;
 
       await Promise.all([saveDbPromise, forwardSheetPromise]);
